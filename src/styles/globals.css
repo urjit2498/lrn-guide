@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 260px;
+    --header-height: 60px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans antialiased bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Code block styling */
+  pre {
+    @apply rounded-lg overflow-x-auto text-sm;
+  }
+
+  code {
+    @apply font-mono text-sm;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+}
+
+@layer components {
+  /* Code block inside content */
+  .prose-code pre {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-xl my-4 text-xs leading-relaxed;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prose-code code:not(pre code) {
+    @apply bg-gray-100 text-indigo-600 px-1.5 py-0.5 rounded text-xs;
+  }
+  .dark .prose-code code:not(pre code) {
+    @apply bg-gray-800 text-indigo-400;
+  }
+
+  /* Chat bubble */
+  .chat-user {
+    @apply bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-xs ml-auto;
+  }
+
+  .chat-assistant {
+    @apply bg-white text-gray-800 rounded-2xl rounded-tl-sm px-4 py-2.5 max-w-sm shadow-sm border border-gray-100;
+  }
+  .dark .chat-assistant {
+    @apply bg-gray-800 text-gray-100 border-gray-700;
+  }
+
+  /* Level badge */
+  .badge-beginner {
+    @apply bg-green-100 text-green-700;
+  }
+  .dark .badge-beginner {
+    background-color: rgb(20 83 45 / 0.3);
+    @apply text-green-300;
+  }
+  .badge-intermediate {
+    @apply bg-yellow-100 text-yellow-700;
+  }
+  .dark .badge-intermediate {
+    background-color: rgb(113 63 18 / 0.3);
+    @apply text-yellow-300;
+  }
+  .badge-advanced {
+    @apply bg-red-100 text-red-700;
+  }
+  .dark .badge-advanced {
+    background-color: rgb(127 29 29 / 0.3);
+    @apply text-red-300;
+  }
+}

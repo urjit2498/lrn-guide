@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="card-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(99,102,241,0.15)"/>
+      <stop offset="100%" stop-color="rgba(139,92,246,0.05)"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <g stroke="rgba(99,102,241,0.08)" stroke-width="1">
+    <line x1="0" y1="90" x2="1200" y2="90"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="360" x2="1200" y2="360"/>
+    <line x1="0" y1="450" x2="1200" y2="450"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Glow circles in background -->
+  <circle cx="950" cy="120" r="180" fill="rgba(99,102,241,0.12)" filter="url(#glow)"/>
+  <circle cx="100" cy="520" r="140" fill="rgba(139,92,246,0.1)" filter="url(#glow)"/>
+
+  <!-- Logo mark (large) -->
+  <rect x="80" y="80" width="72" height="72" rx="18" fill="url(#accent)"/>
+  <!-- < -->
+  <path d="M98 116l14-14v7L104 116l8 7v7l-14-14z" fill="white"/>
+  <!-- > -->
+  <path d="M134 116l-14-14v7l8 7-8 7v7l14-14z" fill="white"/>
+  <!-- / -->
+  <line x1="122" y1="96" x2="114" y2="136" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-opacity="0.9"/>
+
+  <!-- Site name -->
+  <text x="172" y="121" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="42" fill="white" letter-spacing="-0.5">LRN GUIDE</text>
+  <text x="172" y="145" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="18" fill="rgba(165,180,252,0.8)">lrnguide.dev</text>
+
+  <!-- Divider -->
+  <line x1="80" y1="190" x2="1120" y2="190" stroke="rgba(99,102,241,0.3)" stroke-width="1"/>
+
+  <!-- Main headline -->
+  <text x="80" y="275" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="64" fill="white" letter-spacing="-1">Master Web Development</text>
+  <text x="80" y="350" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="64" fill="url(#accent)" letter-spacing="-1">From Beginner to Pro</text>
+
+  <!-- Subheadline -->
+  <text x="80" y="405" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="24" fill="rgba(199,210,254,0.85)">Structured learning paths · Interview prep · Track your progress</text>
+
+  <!-- Topic pills -->
+  <!-- PHP -->
+  <rect x="80" y="445" width="88" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="124" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">PHP</text>
+
+  <!-- React -->
+  <rect x="180" y="445" width="94" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="227" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">React</text>
+
+  <!-- Laravel -->
+  <rect x="286" y="445" width="104" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="338" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">Laravel</text>
+
+  <!-- Node.js -->
+  <rect x="402" y="445" width="104" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="454" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">Node.js</text>
+
+  <!-- MySQL -->
+  <rect x="518" y="445" width="100" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="568" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">MySQL</text>
+
+  <!-- MongoDB -->
+  <rect x="630" y="445" width="114" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="687" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">MongoDB</text>
+
+  <!-- DevOps -->
+  <rect x="756" y="445" width="104" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="808" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">DevOps</text>
+
+  <!-- Git -->
+  <rect x="872" y="445" width="80" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="912" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">Git</text>
+
+  <!-- Agile -->
+  <rect x="964" y="445" width="92" height="36" rx="18" fill="rgba(99,102,241,0.25)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="1010" y="469" font-family="system-ui, sans-serif" font-size="16" font-weight="600" fill="rgba(199,210,254,0.95)" text-anchor="middle">Agile</text>
+
+  <!-- Free badge -->
+  <rect x="80" y="508" width="78" height="30" rx="15" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.4)" stroke-width="1"/>
+  <text x="119" y="528" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(134,239,172,0.95)" text-anchor="middle">✓ FREE</text>
+
+  <!-- Interview prep badge -->
+  <rect x="170" y="508" width="176" height="30" rx="15" fill="rgba(99,102,241,0.2)" stroke="rgba(99,102,241,0.4)" stroke-width="1"/>
+  <text x="258" y="528" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(165,180,252,0.95)" text-anchor="middle">✓ Interview Prep</text>
+
+  <!-- Progress tracking badge -->
+  <rect x="358" y="508" width="196" height="30" rx="15" fill="rgba(99,102,241,0.2)" stroke="rgba(99,102,241,0.4)" stroke-width="1"/>
+  <text x="456" y="528" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(165,180,252,0.95)" text-anchor="middle">✓ Progress Tracking</text>
+
+  <!-- Bottom border accent -->
+  <rect x="0" y="618" width="1200" height="12" fill="url(#accent)" opacity="0.8"/>
+</svg>
