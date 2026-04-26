@@ -43,6 +43,12 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer components {
   /* Code block inside content */
   .prose-code pre {

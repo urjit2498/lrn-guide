@@ -98,7 +98,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         )}
 
         {/* Topic list */}
-        <div className="flex-1 overflow-y-auto px-3 pb-4">
+        <div className="flex-1 overflow-y-auto px-3 pb-4 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <p className="text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-500 font-semibold px-1 mb-1">
             {searchQuery ? `Results (${filtered.length})` : 'All Topics'}
           </p>
