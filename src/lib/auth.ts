@@ -6,6 +6,10 @@ import { upsertProfile } from './profile';
 export async function signUp(email: string, password: string) {
   const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) throw new Error(error.message);
+  // Create profile row immediately so the user is visible in the profiles table
+  if (data.user) {
+    await upsertProfile(data.user.id, { email: data.user.email ?? '' }).catch(() => {});
+  }
   return data;
 }
 
