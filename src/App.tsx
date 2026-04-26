@@ -3,6 +3,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { TopicContent } from '@/components/learning/TopicContent';
 import { LandingPage } from '@/components/layout/LandingPage';
+import { ResetPasswordModal } from '@/components/auth/ResetPasswordModal';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { fetchProgress } from '@/lib/progress';
 import { useAppStore } from '@/store/appStore';
@@ -33,16 +34,19 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <>
+      <ResetPasswordModal />
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto">
-          <TopicContent />
-        </main>
+          <main className="flex-1 overflow-y-auto">
+            <TopicContent />
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

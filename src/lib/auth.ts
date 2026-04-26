@@ -28,6 +28,22 @@ export async function signOut() {
   if (error) throw new Error(error.message);
 }
 
+// ─── Forgot password ─────────────────────────────────────────────────────────
+
+export async function resetPassword(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}`,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// ─── Update password (called after PASSWORD_RECOVERY session) ────────────────
+
+export async function updatePassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw new Error(error.message);
+}
+
 // ─── Get current session ─────────────────────────────────────────────────────
 
 export async function getSession() {
