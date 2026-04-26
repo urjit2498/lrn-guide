@@ -32,4 +32,5 @@ export async function upsertProfile(
 export async function deleteAccount(): Promise<void> {
   const { error } = await supabase.rpc('delete_user');
   if (error) throw new Error(error.message);
+  await supabase.auth.signOut();
 }
