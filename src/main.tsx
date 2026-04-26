@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 import App from './App';
+import { AuthProvider } from './contexts/AuthContext';
 import './styles/globals.css';
 
 // Apply persisted dark mode before first render to prevent flash
@@ -22,7 +23,9 @@ if (!root) throw new Error('#root element not found');
 
 createRoot(root).render(
   <React.StrictMode>
-    <App />
-    <Toaster position="top-right" richColors closeButton />
+    <AuthProvider>
+      <App />
+      <Toaster position="top-right" richColors closeButton />
+    </AuthProvider>
   </React.StrictMode>
 );

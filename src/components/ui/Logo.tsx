@@ -26,7 +26,7 @@ export function LogoMark({ size = 32 }: LogoMarkProps) {
       {/* > bracket */}
       <path d="M24 16l-5-5v2.5L22 16l-3 2.5V21l5-5z" fill="white" />
       {/* / slash */}
-      <rect x="14.5" y="9" width="2.5" height="14" rx="1.25" fill="rgba(255,255,255,0.6)" transform="rotate(−15 15.75 16)" />
+      <rect x="14.5" y="9" width="2.5" height="14" rx="1.25" fill="rgba(255,255,255,0.6)" transform="rotate(-15 15.75 16)" />
       <line x1="17" y1="9.5" x2="14" y2="22.5" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeOpacity="0.9" />
     </svg>
   );

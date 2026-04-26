@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/appStore';
-import { getTopicById } from '@/data/topics';
+import { loadTopicContent } from '@/data/topics';
 import { LevelTabs } from './LevelTabs';
 import { ContentCard } from './ContentCard';
 import { InterviewQA } from './InterviewQA';
 import { LevelBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { getInterviewQuestions } from '@/data/interview';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { saveProgress } from '@/lib/progress';
 import { toast } from 'sonner';
+import type { Topic } from '@/types';
 
 export function TopicContent() {
   const {
@@ -17,10 +18,24 @@ export function TopicContent() {
     selectedLevel,
     markLevelComplete,
     isLevelComplete,
-    // openChat,  // CHATBOT DISABLED
   } = useAppStore();
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [saving, setSaving] = useState(false);
+  const [topic, setTopic] = useState<Topic | null>(null);
+  const [contentLoading, setContentLoading] = useState(true);
+
+  // Load full topic content lazily — only runs when selectedTopicId changes
+  useEffect(() => {
+    let cancelled = false;
+    setContentLoading(true);
+    loadTopicContent(selectedTopicId).then((t) => {
+      if (!cancelled) {
+        setTopic(t ?? null);
+        setContentLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [selectedTopicId]);
 
   async function handleMarkComplete() {
     setSaving(true);
@@ -29,7 +44,9 @@ export function TopicContent() {
         await saveProgress(user.id, selectedTopicId, selectedLevel, true);
       }
       markLevelComplete(selectedTopicId, selectedLevel);
-      toast.success(`${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)} level marked as complete!`);
+      toast.success(
+        `${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)} level marked as complete!`
+      );
     } catch {
       toast.error('Failed to save progress. Please try again.');
     } finally {
@@ -37,7 +54,10 @@ export function TopicContent() {
     }
   }
 
-  const topic = getTopicById(selectedTopicId);
+  if (contentLoading) {
+    return <TopicSkeleton />;
+  }
+
   if (!topic) return null;
 
   const levelContent = topic.levels.find((l) => l.level === selectedLevel);
@@ -50,11 +70,9 @@ export function TopicContent() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-      {/* Level tabs */}
       <LevelTabs topicId={topic.id} />
 
-      {/* Level intro */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <LevelBadge level={selectedLevel} />
@@ -68,16 +86,8 @@ export function TopicContent() {
             {levelContent.intro}
           </p>
         </div>
-
-        {/* CHATBOT DISABLED — re-enable by uncommenting
-        <Button variant="outline" size="sm" onClick={openChat} className="flex-shrink-0">
-          <span>🤖</span>
-          <span className="hidden sm:inline">Ask AI</span>
-        </Button>
-        */}
       </div>
 
-      {/* Content cards */}
       <div className="space-y-4">
         {levelContent.sections.map((section, i) => (
           <ContentCard
@@ -88,10 +98,8 @@ export function TopicContent() {
         ))}
       </div>
 
-      {/* Interview Q&A */}
       <InterviewQA questions={questionsForLevel} />
 
-      {/* Complete level button */}
       <div className="pt-2 pb-4">
         {!completed ? (
           <Button
@@ -122,6 +130,37 @@ export function TopicContent() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Loading skeleton ─────────────────────────────────────────────────────────
+
+function TopicSkeleton() {
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6 animate-pulse">
+      {/* Level tabs placeholder */}
+      <div className="h-11 rounded-xl bg-gray-100 dark:bg-gray-800" />
+
+      {/* Intro */}
+      <div className="space-y-2">
+        <div className="h-5 w-24 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-1/2 rounded bg-gray-200 dark:bg-gray-700" />
+      </div>
+
+      {/* Content cards */}
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 space-y-3"
+        >
+          <div className="h-5 w-1/3 rounded bg-gray-200 dark:bg-gray-700" />
+          <div className="h-3 w-full rounded bg-gray-100 dark:bg-gray-800" />
+          <div className="h-3 w-5/6 rounded bg-gray-100 dark:bg-gray-800" />
+          <div className="h-3 w-4/6 rounded bg-gray-100 dark:bg-gray-800" />
+        </div>
+      ))}
     </div>
   );
 }

@@ -3,14 +3,13 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { TopicContent } from '@/components/learning/TopicContent';
 import { LandingPage } from '@/components/layout/LandingPage';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { fetchProgress } from '@/lib/progress';
 import { useAppStore } from '@/store/appStore';
-// import { ChatBot } from '@/components/chatbot/ChatBot';  // CHATBOT DISABLED
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthContext();
   const loadProgress = useAppStore((s) => s.loadProgress);
 
   // Sync progress from Supabase whenever user logs in
@@ -19,7 +18,7 @@ export default function App() {
     fetchProgress(user.id)
       .then((rows) => loadProgress(rows))
       .catch(() => {}); // silently fall back to local progress
-  }, [user?.id]);
+  }, [user?.id, loadProgress]);
 
   if (loading) {
     return (
@@ -35,35 +34,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
-      {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        {/* Content — full width while chatbot is disabled */}
         <main className="flex-1 overflow-y-auto">
           <TopicContent />
         </main>
-
-        {/* CHATBOT DISABLED — re-enable by uncommenting below and restoring imports
-        <div className="flex flex-1 overflow-hidden">
-          <main className="flex-1 overflow-y-auto">
-            <TopicContent />
-          </main>
-          {isChatOpen && (
-            <div className="hidden md:block flex-shrink-0 overflow-hidden">
-              <ChatBot />
-            </div>
-          )}
-        </div>
-        {isChatOpen && (
-          <div className="md:hidden fixed inset-0 z-40 flex flex-col bg-white dark:bg-gray-900">
-            <ChatBot />
-          </div>
-        )}
-        */}
       </div>
     </div>
   );

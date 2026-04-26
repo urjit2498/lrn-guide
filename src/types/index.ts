@@ -37,17 +37,6 @@ export interface Topic {
   levels: LevelContent[];
 }
 
-// ─── Chatbot Types ───────────────────────────────────────────────────────────
-
-export type MessageRole = 'user' | 'assistant' | 'system';
-
-export interface ChatMessage {
-  id: string;
-  role: MessageRole;
-  content: string;
-  timestamp: Date;
-}
-
 // ─── Supabase / Auth Types ───────────────────────────────────────────────────
 
 export interface AuthUser {
@@ -86,9 +75,6 @@ export interface AppState {
   selectedLevel: Level;
   searchQuery: string;
   isDarkMode: boolean;
-  chatMessages: ChatMessage[];
-  isChatOpen: boolean;
-  isChatLoading: boolean;
-  bookmarks: string[];          // Array of topic IDs
-  progress: Record<string, Record<Level, boolean>>;  // topicId → level → completed
+  bookmarks: string[];
+  progress: Record<string, Record<Level, boolean>>;
 }

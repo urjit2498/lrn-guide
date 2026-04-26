@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { signIn, signUp, signOut } from '@/lib/auth';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -10,8 +10,28 @@ interface AuthModalProps {
 
 type AuthMode = 'login' | 'signup';
 
+type PasswordStrength = 'weak' | 'fair' | 'strong';
+
+function getPasswordStrength(pw: string): PasswordStrength | null {
+  if (pw.length === 0) return null;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (score <= 1) return 'weak';
+  if (score <= 2) return 'fair';
+  return 'strong';
+}
+
+const strengthConfig: Record<PasswordStrength, { label: string; color: string; bars: number }> = {
+  weak:   { label: 'Weak',   color: 'bg-red-500',    bars: 1 },
+  fair:   { label: 'Fair',   color: 'bg-yellow-500', bars: 2 },
+  strong: { label: 'Strong', color: 'bg-green-500',  bars: 3 },
+};
+
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -122,9 +142,37 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min. 6 characters"
+                placeholder={mode === 'signup' ? 'Min. 8 characters recommended' : 'Your password'}
                 className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              {/* Strength meter — only shown on signup */}
+              {mode === 'signup' && (() => {
+                const strength = getPasswordStrength(password);
+                if (!strength) return null;
+                const cfg = strengthConfig[strength];
+                return (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map((n) => (
+                        <div
+                          key={n}
+                          className={`h-1 flex-1 rounded-full transition-colors duration-200 ${
+                            n <= cfg.bars ? cfg.color : 'bg-gray-200 dark:bg-gray-700'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className={`text-xs font-medium ${
+                      strength === 'weak'   ? 'text-red-500' :
+                      strength === 'fair'   ? 'text-yellow-600 dark:text-yellow-400' :
+                                             'text-green-600 dark:text-green-400'
+                    }`}>
+                      {cfg.label} password
+                      {strength === 'weak' && ' — add uppercase, numbers, or symbols'}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
 
             <button

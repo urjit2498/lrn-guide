@@ -1,17 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Level, ChatMessage, AppState } from '@/types';
+import { Level, AppState } from '@/types';
 
 interface AppActions {
   setSelectedTopic: (id: string) => void;
   setSelectedLevel: (level: Level) => void;
   setSearchQuery: (query: string) => void;
   toggleDarkMode: () => void;
-  openChat: () => void;
-  closeChat: () => void;
-  addChatMessage: (msg: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
-  clearChat: () => void;
-  setChatLoading: (loading: boolean) => void;
   toggleBookmark: (topicId: string) => void;
   markLevelComplete: (topicId: string, level: Level) => void;
   isLevelComplete: (topicId: string, level: Level) => boolean;
@@ -23,9 +18,6 @@ const initialState: AppState = {
   selectedLevel: 'beginner',
   searchQuery: '',
   isDarkMode: false,
-  chatMessages: [],
-  isChatOpen: false,
-  isChatLoading: false,
   bookmarks: [],
   progress: {},
 };
@@ -45,24 +37,8 @@ export const useAppStore = create<AppState & AppActions>()(
       toggleDarkMode: () => {
         const next = !get().isDarkMode;
         set({ isDarkMode: next });
-        // Apply dark class to HTML element
         document.documentElement.classList.toggle('dark', next);
       },
-
-      openChat: () => set({ isChatOpen: true }),
-      closeChat: () => set({ isChatOpen: false }),
-
-      addChatMessage: (msg) =>
-        set((state) => ({
-          chatMessages: [
-            ...state.chatMessages,
-            { ...msg, id: crypto.randomUUID(), timestamp: new Date() },
-          ],
-        })),
-
-      clearChat: () => set({ chatMessages: [] }),
-
-      setChatLoading: (loading) => set({ isChatLoading: loading }),
 
       toggleBookmark: (topicId) =>
         set((state) => ({
@@ -86,17 +62,22 @@ export const useAppStore = create<AppState & AppActions>()(
         get().progress[topicId]?.[level] ?? false,
 
       loadProgress: (rows) => {
-        const progress: Record<string, Record<Level, boolean>> = {};
-        for (const row of rows) {
-          if (!progress[row.topic]) progress[row.topic] = {} as Record<Level, boolean>;
-          progress[row.topic][row.subtopic as Level] = row.completed;
-        }
-        set({ progress });
+        const VALID_LEVELS = new Set<Level>(['beginner', 'intermediate', 'advanced']);
+        set((state) => {
+          const merged = { ...state.progress };
+          for (const row of rows) {
+            if (!VALID_LEVELS.has(row.subtopic as Level)) continue;
+            merged[row.topic] = {
+              ...merged[row.topic],
+              [row.subtopic as Level]: row.completed,
+            };
+          }
+          return { progress: merged };
+        });
       },
     }),
     {
       name: 'lrn-guide-storage',
-      // Only persist preferences and progress — not chat messages
       partialize: (state) => ({
         selectedTopicId: state.selectedTopicId,
         selectedLevel: state.selectedLevel,

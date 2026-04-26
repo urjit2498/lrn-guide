@@ -116,7 +116,25 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
     }));
   }
 
+  function isValidUrl(value: string): boolean {
+    if (!value) return true; // empty is fine
+    try {
+      const url = new URL(value);
+      return url.protocol === 'https:' || url.protocol === 'http:';
+    } catch {
+      return false;
+    }
+  }
+
   async function handleSave() {
+    if (!isValidUrl(form.github_url)) {
+      toast.error('Invalid GitHub URL.');
+      return;
+    }
+    if (!isValidUrl(form.linkedin_url)) {
+      toast.error('Invalid LinkedIn URL.');
+      return;
+    }
     setSaving(true);
     try {
       await upsertProfile(user.id, form);
@@ -223,8 +241,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="Full Name">
                   <input
                     value={form.full_name}
-                    onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                    onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))}
                     placeholder="e.g. Urjit Patel"
+                    maxLength={100}
                     className={inputCls}
                   />
                 </Field>
@@ -233,7 +252,7 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="Role">
                   <select
                     value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
                     className={inputCls}
                   >
                     <option value="">Select your role…</option>
@@ -248,7 +267,7 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                       <button
                         key={lvl}
                         type="button"
-                        onClick={() => setForm({ ...form, experience_level: lvl })}
+                        onClick={() => setForm((prev) => ({ ...prev, experience_level: lvl }))}
                         className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                           form.experience_level === lvl
                             ? 'bg-indigo-600 border-indigo-600 text-white'
@@ -268,7 +287,7 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                     min={0}
                     max={50}
                     value={form.years_of_experience ?? ''}
-                    onChange={(e) => setForm({ ...form, years_of_experience: e.target.value === '' ? null : Number(e.target.value) })}
+                    onChange={(e) => setForm((prev) => ({ ...prev, years_of_experience: e.target.value === '' ? null : Number(e.target.value) }))}
                     placeholder="e.g. 3"
                     className={inputCls}
                   />
@@ -299,8 +318,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                   <textarea
                     rows={2}
                     value={form.learning_goals}
-                    onChange={(e) => setForm({ ...form, learning_goals: e.target.value })}
+                    onChange={(e) => setForm((prev) => ({ ...prev, learning_goals: e.target.value }))}
                     placeholder="What are you aiming to learn or improve?"
+                    maxLength={500}
                     className={`${inputCls} resize-none`}
                   />
                 </Field>
@@ -309,8 +329,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="GitHub URL">
                   <input
                     value={form.github_url}
-                    onChange={(e) => setForm({ ...form, github_url: e.target.value })}
+                    onChange={(e) => setForm((prev) => ({ ...prev, github_url: e.target.value }))}
                     placeholder="https://github.com/username"
+                    maxLength={200}
                     className={inputCls}
                   />
                 </Field>
@@ -319,8 +340,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="LinkedIn URL">
                   <input
                     value={form.linkedin_url}
-                    onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
+                    onChange={(e) => setForm((prev) => ({ ...prev, linkedin_url: e.target.value }))}
                     placeholder="https://linkedin.com/in/username"
+                    maxLength={200}
                     className={inputCls}
                   />
                 </Field>

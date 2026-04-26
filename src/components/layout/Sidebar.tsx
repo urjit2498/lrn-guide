@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { TOPICS } from '@/data/topics';
+import { TOPICS, type TopicMeta } from '@/data/topics';
 import { useAppStore } from '@/store/appStore';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Logo } from '@/components/ui/Logo';
@@ -159,7 +159,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 // ─── Topic Button ─────────────────────────────────────────────────────────────
 
 interface TopicButtonProps {
-  topic: (typeof TOPICS)[0];
+  topic: TopicMeta;
   isActive: boolean;
   completedCount: number;
   bookmarked?: boolean;

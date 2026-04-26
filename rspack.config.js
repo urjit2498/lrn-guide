@@ -4,8 +4,13 @@ const { DefinePlugin, CopyRspackPlugin } = require('@rspack/core');
 // Load .env.local if it exists
 try { require('dotenv').config({ path: '.env.local' }); } catch {}
 
+const isProd = process.env.NODE_ENV === 'production';
+
 /** @type {import('@rspack/core').Configuration} */
 module.exports = {
+  // Source maps: full maps in dev, none in production (prevents source exposure)
+  devtool: isProd ? false : 'cheap-module-source-map',
+
   entry: './src/main.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -57,10 +62,8 @@ module.exports = {
     new CopyRspackPlugin({
       patterns: [{ from: 'public', to: '.' }],
     }),
-    // Replace process.env.* at build time — makes them available in browser
+    // Only inject safe public vars — NEVER put API keys here (they end up in the browser bundle)
     new DefinePlugin({
-      'process.env.OPENAI_API_KEY':    JSON.stringify(process.env.OPENAI_API_KEY ?? ''),
-      'process.env.OPENAI_MODEL':      JSON.stringify(process.env.OPENAI_MODEL ?? 'gpt-4o-mini'),
       'process.env.SUPABASE_URL':      JSON.stringify(process.env.SUPABASE_URL ?? ''),
       'process.env.SUPABASE_ANON_KEY': JSON.stringify(process.env.SUPABASE_ANON_KEY ?? ''),
     }),

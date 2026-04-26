@@ -2,7 +2,7 @@ import { useAppStore } from '@/store/appStore';
 import { getTopicById } from '@/data/topics';
 import { Button } from '@/components/ui/Button';
 import { ProfilePanel } from '@/components/profile/ProfilePanel';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -13,7 +13,7 @@ export function Header({ onMenuClick }: HeaderProps) {
     useAppStore();
   // const { isChatOpen, openChat, closeChat } = useAppStore();  // CHATBOT DISABLED
 
-  const { user } = useAuth();
+  const { user } = useAuthContext();
 
   const topic = getTopicById(selectedTopicId);
   const isBookmarked = bookmarks.includes(selectedTopicId);
@@ -82,20 +82,6 @@ export function Header({ onMenuClick }: HeaderProps) {
             </svg>
           )}
         </Button>
-
-        {/* CHATBOT DISABLED — re-enable by uncommenting
-        <Button
-          variant={isChatOpen ? 'primary' : 'outline'}
-          size="sm"
-          onClick={() => isChatOpen ? closeChat() : openChat()}
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-5l-4 4v-4z" />
-          </svg>
-          <span className="hidden sm:inline">AI Tutor</span>
-        </Button>
-        */}
 
         {/* Profile */}
         {user && <ProfilePanel user={user} />}
