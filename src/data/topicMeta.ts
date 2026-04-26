@@ -103,4 +103,44 @@ export const TOPIC_META: TopicMeta[] = [
     description:
       'Agile methodology path covering Scrum, Kanban, planning, and interview-ready process understanding.',
   },
+  {
+    id: 'vuejs',
+    name: 'Vue.js',
+    icon: '💚',
+    color: 'bg-green-100 dark:bg-green-900/30',
+    textColor: 'text-green-700 dark:text-green-300',
+    borderColor: 'border-green-300 dark:border-green-700',
+    description:
+      'Vue.js learning path from template syntax and reactivity to Pinia, Composition API, and interview preparation.',
+  },
+  {
+    id: 'postgresql',
+    name: 'PostgreSQL',
+    icon: '🐘',
+    color: 'bg-sky-100 dark:bg-sky-900/30',
+    textColor: 'text-sky-700 dark:text-sky-300',
+    borderColor: 'border-sky-300 dark:border-sky-700',
+    description:
+      'PostgreSQL curriculum covering schema design, advanced queries, indexing, JSON support, and database interview essentials.',
+  },
+  {
+    id: 'manual-qa',
+    name: 'Manual QA',
+    icon: '🧪',
+    color: 'bg-purple-100 dark:bg-purple-900/30',
+    textColor: 'text-purple-700 dark:text-purple-300',
+    borderColor: 'border-purple-300 dark:border-purple-700',
+    description:
+      'Manual QA roadmap covering test planning, case design, bug reporting, Agile QA practices, and interview preparation.',
+  },
+  {
+    id: 'automation-qa',
+    name: 'Automation QA',
+    icon: '🤖',
+    color: 'bg-rose-100 dark:bg-rose-900/30',
+    textColor: 'text-rose-700 dark:text-rose-300',
+    borderColor: 'border-rose-300 dark:border-rose-700',
+    description:
+      'Automation QA path with Selenium, Playwright, POM, CI/CD integration, and advanced test automation interview scenarios.',
+  },
 ];

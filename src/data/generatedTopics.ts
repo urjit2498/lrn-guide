@@ -232,6 +232,94 @@ const TOPIC_MODULES: Record<string, string[]> = {
     'Common Agile Mistakes',
     'Agile Interview Scenarios',
   ],
+  vuejs: [
+    'What is Vue.js',
+    'Vue CLI and Project Setup',
+    'Template Syntax and Directives',
+    'Data Binding and Reactivity',
+    'Components and Props',
+    'Component Events and Emits',
+    'Computed Properties and Watchers',
+    'Lifecycle Hooks',
+    'Vue Router Basics',
+    'Navigation Guards and Route Meta',
+    'Pinia State Management',
+    'Composables and the Composition API',
+    'Forms and v-model',
+    'HTTP Requests with Axios',
+    'Slots and Dynamic Components',
+    'Transitions and Animations',
+    'Performance Optimization',
+    'Testing Vue Applications',
+    'Vue 3 Migration from Vue 2',
+    'Vue.js Interview Trade-offs',
+  ],
+  postgresql: [
+    'What is PostgreSQL',
+    'Installation and Setup',
+    'Database Design Fundamentals',
+    'SQL CRUD Operations',
+    'Filtering, Sorting, and Pagination',
+    'JOINs and Relationships',
+    'Indexes and Query Optimization',
+    'Transactions and ACID Properties',
+    'Constraints and Data Integrity',
+    'Views and Materialized Views',
+    'Stored Procedures and Functions',
+    'Triggers and Rules',
+    'Full-Text Search',
+    'JSON and JSONB Support',
+    'Partitioning and Large Tables',
+    'Replication and High Availability',
+    'Security and Role Management',
+    'Backup and Recovery',
+    'Common Performance Bottlenecks',
+    'PostgreSQL Interview Case Studies',
+  ],
+  'manual-qa': [
+    'What is Manual QA',
+    'Testing Fundamentals and SDLC',
+    'Types of Testing',
+    'Test Planning and Strategy',
+    'Test Case Design Techniques',
+    'Writing Effective Test Cases',
+    'Test Execution and Defect Reporting',
+    'Bug Life Cycle and Priority vs Severity',
+    'Functional Testing',
+    'Non-Functional Testing',
+    'Regression Testing and Smoke Testing',
+    'User Acceptance Testing (UAT)',
+    'API Testing with Postman',
+    'Database Testing',
+    'Mobile Application Testing',
+    'Cross-Browser Testing',
+    'Agile QA Practices',
+    'Test Documentation and Traceability',
+    'Common QA Mistakes',
+    'Manual QA Interview Scenarios',
+  ],
+  'automation-qa': [
+    'What is Automation QA',
+    'When to Automate vs Manual Testing',
+    'Selenium WebDriver Basics',
+    'Page Object Model (POM)',
+    'TestNG and JUnit Frameworks',
+    'Writing Effective Automated Tests',
+    'Data-Driven Testing',
+    'Handling Dynamic Elements',
+    'API Automation with RestAssured',
+    'CI/CD Integration for Tests',
+    'Playwright and Modern Testing Tools',
+    'Test Reporting and Dashboards',
+    'Parallel Test Execution',
+    'Performance Testing Basics with JMeter',
+    'Mobile Automation with Appium',
+    'BDD with Cucumber and Gherkin',
+    'Maintenance and Flaky Test Handling',
+    'Test Coverage Strategy',
+    'Common Automation Mistakes',
+    'Automation QA Interview Scenarios',
+  ],
 };
 
 const topicVsComparisons: Record<string, string> = {
@@ -244,6 +332,10 @@ const topicVsComparisons: Record<string, string> = {
   devops: 'Fast delivery vs release risk control',
   github: 'Fast merge velocity vs strict quality gates',
   agile: 'Agile adaptation vs fixed-plan delivery',
+  vuejs: 'Vue.js progressive reactivity model vs React unidirectional data flow',
+  postgresql: 'PostgreSQL relational integrity vs MongoDB schema flexibility',
+  'manual-qa': 'Manual exploratory coverage vs automated regression speed',
+  'automation-qa': 'Automated test speed and repeatability vs manual test human intuition',
 };
 
 // ─── Per-module code examples ────────────────────────────────────────────────
@@ -2579,6 +2671,1188 @@ const AGILE_EXAMPLES: Record<string, string> = {
 # - Rotate facilitator to avoid single-voice bias`,
 };
 
+// ─── Vue.js examples ─────────────────────────────────────────────────────────
+
+const VUEJS_EXAMPLES: Record<string, string> = {
+  'What is Vue.js': `<!-- Vue.js: progressive JavaScript framework for building UIs -->
+<!-- Single File Component (SFC) — App.vue -->
+
+<template>
+  <div>
+    <h1>{{ message }}</h1>
+    <button @click="greet">Click me</button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const message = ref('Hello, Vue.js!')
+
+function greet() {
+  message.value = 'You clicked the button!'
+}
+</script>
+
+<style scoped>
+h1 { color: #42b883; }
+</style>`,
+
+  'Vue CLI and Project Setup': `# Create a new Vue 3 project with Vite (recommended)
+npm create vue@latest my-app
+# Select: TypeScript ✅  Vue Router ✅  Pinia ✅  Vitest ✅
+
+cd my-app
+npm install
+npm run dev      # development server on http://localhost:5173
+npm run build    # production build
+npm run test     # run unit tests
+
+# Project structure:
+# src/
+#   assets/        static assets
+#   components/    reusable SFCs
+#   router/        Vue Router config
+#   stores/        Pinia stores
+#   views/         page-level components
+#   App.vue        root component
+#   main.ts        entry point`,
+
+  'Template Syntax and Directives': `<template>
+  <!-- Text interpolation -->
+  <p>{{ title }}</p>
+
+  <!-- v-bind: bind attributes -->
+  <img :src="imageUrl" :alt="imageAlt" />
+
+  <!-- v-if / v-else-if / v-else: conditional rendering -->
+  <span v-if="status === 'active'">Active</span>
+  <span v-else-if="status === 'pending'">Pending</span>
+  <span v-else>Inactive</span>
+
+  <!-- v-show: CSS display toggle (DOM stays in tree) -->
+  <p v-show="isVisible">Visible when true</p>
+
+  <!-- v-for: list rendering -->
+  <ul>
+    <li v-for="item in items" :key="item.id">{{ item.name }}</li>
+  </ul>
+
+  <!-- v-on: event handling -->
+  <button @click="handleClick">Submit</button>
+  <input @keyup.enter="onEnter" />
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const title   = ref('Directives Demo')
+const imageUrl = ref('/logo.png')
+const imageAlt = ref('Logo')
+const status   = ref('active')
+const isVisible = ref(true)
+const items    = ref([{ id: 1, name: 'Vue' }, { id: 2, name: 'React' }])
+
+function handleClick() { console.log('clicked') }
+function onEnter()     { console.log('enter pressed') }
+</script>`,
+
+  'Data Binding and Reactivity': `<template>
+  <p>Count: {{ count }}</p>
+  <p>Double: {{ double }}</p>
+  <button @click="increment">+1</button>
+
+  <!-- Two-way binding with v-model -->
+  <input v-model="name" placeholder="Your name" />
+  <p>Hello, {{ name }}</p>
+</template>
+
+<script setup>
+import { ref, computed, reactive, watch } from 'vue'
+
+// ref: for primitives
+const count = ref(0)
+const name  = ref('')
+
+// computed: derived state — auto-updates when deps change
+const double = computed(() => count.value * 2)
+
+// reactive: for objects
+const user = reactive({ id: 1, role: 'admin' })
+
+function increment() {
+  count.value++   // .value required outside template
+}
+
+// watch: side effects when a value changes
+watch(count, (newVal, oldVal) => {
+  console.log(\`count changed from \${oldVal} to \${newVal}\`)
+})
+</script>`,
+
+  'Components and Props': `<!-- ParentComponent.vue -->
+<template>
+  <UserCard :user="currentUser" :highlight="true" />
+</template>
+
+<script setup>
+import UserCard from './UserCard.vue'
+import { ref } from 'vue'
+
+const currentUser = ref({ id: 1, name: 'Alice', role: 'Admin' })
+</script>
+
+---
+
+<!-- UserCard.vue -->
+<template>
+  <div :class="['card', { 'card--highlight': highlight }]">
+    <h2>{{ user.name }}</h2>
+    <span>{{ user.role }}</span>
+  </div>
+</template>
+
+<script setup>
+// defineProps with TypeScript types
+const props = defineProps<{
+  user: { id: number; name: string; role: string }
+  highlight?: boolean
+}>()
+</script>`,
+
+  'Component Events and Emits': `<!-- Child.vue -->
+<template>
+  <button @click="sendMessage">Notify Parent</button>
+</template>
+
+<script setup>
+// Declare emitted events with types
+const emit = defineEmits<{
+  (e: 'message', payload: string): void
+  (e: 'delete', id: number): void
+}>()
+
+function sendMessage() {
+  emit('message', 'Hello from child!')
+}
+</script>
+
+---
+
+<!-- Parent.vue -->
+<template>
+  <!-- Listen with @ shorthand -->
+  <Child @message="onMessage" @delete="onDelete" />
+  <p>{{ received }}</p>
+</template>
+
+<script setup>
+import Child from './Child.vue'
+import { ref } from 'vue'
+
+const received = ref('')
+
+function onMessage(msg: string) {
+  received.value = msg
+}
+function onDelete(id: number) {
+  console.log('delete item', id)
+}
+</script>`,
+
+  'Computed Properties and Watchers': `<script setup>
+import { ref, computed, watch, watchEffect } from 'vue'
+
+const firstName = ref('Alice')
+const lastName  = ref('Smith')
+
+// computed: cached — only recalculates when deps change
+const fullName = computed(() => \`\${firstName.value} \${lastName.value}\`)
+
+// watch: explicit dep tracking — good for async side effects
+watch(firstName, async (newVal) => {
+  console.log('firstName changed to', newVal)
+  // await fetchSuggestions(newVal)
+})
+
+// watch multiple sources
+watch([firstName, lastName], ([fn, ln]) => {
+  console.log('Name is now', fn, ln)
+})
+
+// watchEffect: auto-tracks deps used inside
+watchEffect(() => {
+  document.title = fullName.value  // tracks fullName → firstName, lastName
+})
+</script>`,
+
+  'Lifecycle Hooks': `<script setup>
+import {
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
+  onUnmounted,
+} from 'vue'
+
+// onMounted: DOM is ready — safe to access refs, call APIs
+onMounted(() => {
+  console.log('Component mounted')
+  fetchData()
+})
+
+// onBeforeUnmount: cleanup — clear timers, remove listeners
+onBeforeUnmount(() => {
+  clearInterval(timer)
+  window.removeEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  console.log('Component destroyed')
+})
+
+function fetchData() { /* API call */ }
+let timer: ReturnType<typeof setInterval>
+function onResize() { /* handler */ }
+</script>`,
+
+  'Vue Router Basics': `// src/router/index.ts
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView    from '@/views/HomeView.vue'
+import UserView    from '@/views/UserView.vue'
+import NotFound    from '@/views/NotFound.vue'
+
+const routes = [
+  { path: '/',           component: HomeView },
+  { path: '/users/:id',  component: UserView, name: 'user' },
+  { path: '/:pathMatch(.*)*', component: NotFound },
+]
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+---
+
+<!-- In a component -->
+<script setup>
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route  = useRoute()
+
+const userId = route.params.id     // dynamic segment
+const tab    = route.query.tab     // ?tab=settings
+
+function goToUser(id: number) {
+  router.push({ name: 'user', params: { id } })
+}
+</script>`,
+
+  'Pinia State Management': `// src/stores/auth.ts
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+
+export const useAuthStore = defineStore('auth', () => {
+  // State
+  const user = ref<{ id: number; name: string } | null>(null)
+  const token = ref<string | null>(null)
+
+  // Getters (computed)
+  const isLoggedIn = computed(() => token.value !== null)
+  const userName   = computed(() => user.value?.name ?? 'Guest')
+
+  // Actions
+  async function login(email: string, password: string) {
+    // const res = await api.post('/auth/login', { email, password })
+    token.value = 'jwt-token'
+    user.value  = { id: 1, name: 'Alice' }
+  }
+
+  function logout() {
+    user.value  = null
+    token.value = null
+  }
+
+  return { user, token, isLoggedIn, userName, login, logout }
+})
+
+---
+
+<!-- In a component -->
+<script setup>
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+// auth.isLoggedIn  auth.login()  auth.logout()
+</script>`,
+
+  'Composables and the Composition API': `// src/composables/useFetch.ts
+import { ref, watchEffect } from 'vue'
+
+export function useFetch<T>(url: string) {
+  const data    = ref<T | null>(null)
+  const error   = ref<string | null>(null)
+  const loading = ref(false)
+
+  async function fetchData() {
+    loading.value = true
+    error.value   = null
+    try {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(\`HTTP \${res.status}\`)
+      data.value = await res.json()
+    } catch (e) {
+      error.value = (e as Error).message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  watchEffect(fetchData)
+
+  return { data, error, loading, refetch: fetchData }
+}
+
+---
+
+<!-- Usage in component -->
+<script setup>
+import { useFetch } from '@/composables/useFetch'
+
+const { data, error, loading } = useFetch<User[]>('/api/users')
+</script>`,
+
+  'Forms and v-model': `<template>
+  <form @submit.prevent="handleSubmit">
+    <!-- v-model on input -->
+    <input v-model="form.email" type="email" placeholder="Email" />
+
+    <!-- v-model on select -->
+    <select v-model="form.role">
+      <option value="admin">Admin</option>
+      <option value="member">Member</option>
+    </select>
+
+    <!-- v-model on checkbox -->
+    <input v-model="form.agree" type="checkbox" />
+    <label>I agree</label>
+
+    <p v-if="errors.email" class="error">{{ errors.email }}</p>
+
+    <button type="submit" :disabled="!form.agree">Submit</button>
+  </form>
+</template>
+
+<script setup>
+import { reactive, ref } from 'vue'
+
+const form = reactive({ email: '', role: 'member', agree: false })
+const errors = reactive({ email: '' })
+
+function validate() {
+  errors.email = ''
+  if (!form.email.includes('@')) errors.email = 'Invalid email'
+  return !errors.email
+}
+
+function handleSubmit() {
+  if (!validate()) return
+  console.log('Submit', { ...form })
+}
+</script>`,
+};
+
+// ─── PostgreSQL examples ──────────────────────────────────────────────────────
+
+const POSTGRESQL_EXAMPLES: Record<string, string> = {
+  'What is PostgreSQL': `-- PostgreSQL: powerful open-source relational database
+
+-- Check version
+SELECT version();
+
+-- Create a database
+CREATE DATABASE myapp;
+
+-- Connect
+\\c myapp
+
+-- Create a table
+CREATE TABLE users (
+  id         SERIAL PRIMARY KEY,
+  email      TEXT   NOT NULL UNIQUE,
+  name       TEXT   NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Insert a row
+INSERT INTO users (email, name)
+VALUES ('alice@example.com', 'Alice');
+
+-- Query
+SELECT id, name, email FROM users WHERE email = 'alice@example.com';`,
+
+  'SQL CRUD Operations': `-- CREATE
+INSERT INTO users (email, name)
+VALUES ('bob@example.com', 'Bob')
+RETURNING id, created_at;
+
+-- READ
+SELECT id, name, email
+FROM   users
+WHERE  name ILIKE '%bob%'   -- case-insensitive search
+ORDER  BY created_at DESC;
+
+-- UPDATE
+UPDATE users
+SET    name       = 'Robert',
+       updated_at = now()
+WHERE  id = 1
+RETURNING id, name;
+
+-- DELETE
+DELETE FROM users
+WHERE  id = 1
+RETURNING id;   -- confirm what was deleted
+
+-- Upsert (INSERT … ON CONFLICT)
+INSERT INTO users (email, name)
+VALUES ('alice@example.com', 'Alice Updated')
+ON CONFLICT (email)
+DO UPDATE SET name = EXCLUDED.name;`,
+
+  'Filtering, Sorting, and Pagination': `-- Filtering
+SELECT * FROM orders
+WHERE  status = 'shipped'
+  AND  total  > 100
+  AND  created_at >= now() - INTERVAL '30 days';
+
+-- Pattern matching
+SELECT * FROM products WHERE name ILIKE '%widget%';
+
+-- NULL checks
+SELECT * FROM users WHERE phone IS NULL;
+
+-- Sorting
+SELECT * FROM products
+ORDER BY price DESC, name ASC;
+
+-- Keyset pagination (preferred for large tables)
+SELECT id, name, created_at
+FROM   products
+WHERE  created_at < :last_seen_cursor  -- from previous page
+ORDER  BY created_at DESC
+LIMIT  20;
+
+-- Offset pagination (simpler but slower on large offsets)
+SELECT id, name
+FROM   products
+ORDER  BY id
+LIMIT  20 OFFSET 40;   -- page 3`,
+
+  'JOINs and Relationships': `-- INNER JOIN: only matching rows
+SELECT o.id, u.name, o.total
+FROM   orders  o
+JOIN   users   u ON u.id = o.user_id;
+
+-- LEFT JOIN: all orders, user may be null
+SELECT o.id, u.name
+FROM   orders o
+LEFT  JOIN users u ON u.id = o.user_id;
+
+-- Many-to-many via junction table
+SELECT u.name, r.name AS role
+FROM   users       u
+JOIN   user_roles  ur ON ur.user_id = u.id
+JOIN   roles       r  ON r.id       = ur.role_id;
+
+-- Subquery
+SELECT name FROM users
+WHERE  id IN (
+  SELECT user_id FROM orders WHERE total > 500
+);
+
+-- Common Table Expression (CTE)
+WITH recent_orders AS (
+  SELECT user_id, COUNT(*) AS cnt
+  FROM   orders
+  WHERE  created_at > now() - INTERVAL '7 days'
+  GROUP  BY user_id
+)
+SELECT u.name, ro.cnt
+FROM   users u
+JOIN   recent_orders ro ON ro.user_id = u.id
+ORDER  BY ro.cnt DESC;`,
+
+  'Indexes and Query Optimization': `-- B-tree index (default) — equality and range queries
+CREATE INDEX idx_orders_user_id   ON orders (user_id);
+CREATE INDEX idx_orders_created   ON orders (created_at DESC);
+
+-- Composite index — column order matters
+CREATE INDEX idx_orders_status_created ON orders (status, created_at DESC);
+
+-- Partial index — only index a subset
+CREATE INDEX idx_active_users ON users (email) WHERE active = true;
+
+-- GIN index for full-text search or JSONB
+CREATE INDEX idx_products_fts ON products USING GIN (to_tsvector('english', name));
+
+-- Analyze a query
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT * FROM orders WHERE user_id = 42 ORDER BY created_at DESC LIMIT 10;
+
+-- Key things to look for in EXPLAIN output:
+-- Seq Scan  → missing index
+-- high rows estimate vs actual → stale statistics (run ANALYZE)
+-- Hash Join vs Nested Loop → may indicate missing index on join key`,
+
+  'Transactions and ACID Properties': `-- Begin a transaction
+BEGIN;
+
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+
+-- Commit only if both succeed
+COMMIT;
+
+-- If something fails, roll back
+ROLLBACK;
+
+-- Savepoints — partial rollback within a transaction
+BEGIN;
+  INSERT INTO orders (user_id, total) VALUES (1, 250);
+  SAVEPOINT before_item;
+  INSERT INTO order_items (order_id, product_id) VALUES (999, 1);  -- may fail
+  ROLLBACK TO SAVEPOINT before_item;
+  -- continue with something else
+COMMIT;
+
+-- Isolation levels
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+-- Deadlock prevention: always acquire locks in consistent order`,
+
+  'Views and Materialized Views': `-- View: stored query — always reflects current data
+CREATE VIEW active_users AS
+SELECT id, name, email
+FROM   users
+WHERE  active = true;
+
+SELECT * FROM active_users;
+
+-- Updatable view (simple single-table views)
+UPDATE active_users SET name = 'Bob' WHERE id = 1;
+
+-- Materialized view: result is physically stored — must be refreshed
+CREATE MATERIALIZED VIEW monthly_revenue AS
+SELECT
+  date_trunc('month', created_at) AS month,
+  SUM(total)                      AS revenue
+FROM  orders
+GROUP BY 1
+ORDER BY 1;
+
+-- Refresh (can be expensive — schedule off-peak)
+REFRESH MATERIALIZED VIEW CONCURRENTLY monthly_revenue;
+
+-- Index a materialized view like a regular table
+CREATE INDEX ON monthly_revenue (month);`,
+
+  'JSON and JSONB Support': `-- JSONB: stored as binary — faster for querying than JSON
+CREATE TABLE events (
+  id      SERIAL PRIMARY KEY,
+  payload JSONB NOT NULL
+);
+
+INSERT INTO events (payload)
+VALUES ('{"type": "purchase", "amount": 49.99, "user": {"id": 1}}');
+
+-- Access fields with ->> (text) or -> (JSON)
+SELECT payload->>'type'           AS event_type,
+       (payload->>'amount')::numeric AS amount,
+       payload->'user'->>'id'    AS user_id
+FROM   events;
+
+-- Filter on JSONB fields
+SELECT * FROM events
+WHERE  payload->>'type' = 'purchase'
+  AND  (payload->>'amount')::numeric > 20;
+
+-- GIN index for fast JSONB lookups
+CREATE INDEX idx_events_payload ON events USING GIN (payload);
+
+-- Check if a key exists
+SELECT * FROM events WHERE payload ? 'user';
+
+-- Merge / update JSONB
+UPDATE events
+SET payload = payload || '{"processed": true}'::jsonb
+WHERE id = 1;`,
+
+  'Full-Text Search': `-- to_tsvector converts text to searchable tokens
+-- to_tsquery converts a search string to a query
+
+SELECT id, title
+FROM   articles
+WHERE  to_tsvector('english', title || ' ' || body)
+       @@ to_tsquery('english', 'postgresql & performance');
+
+-- Rank results by relevance
+SELECT id, title,
+       ts_rank(to_tsvector('english', body), query) AS rank
+FROM   articles,
+       to_tsquery('english', 'index & query') query
+WHERE  to_tsvector('english', body) @@ query
+ORDER  BY rank DESC;
+
+-- Store as a generated column for speed
+ALTER TABLE articles
+  ADD COLUMN search_vector TSVECTOR
+  GENERATED ALWAYS AS (
+    to_tsvector('english', coalesce(title,'') || ' ' || coalesce(body,''))
+  ) STORED;
+
+CREATE INDEX idx_articles_fts ON articles USING GIN (search_vector);
+
+-- Query using the indexed column
+SELECT id, title FROM articles
+WHERE  search_vector @@ to_tsquery('english', 'migration & zero:*');`,
+};
+
+// ─── Manual QA examples ───────────────────────────────────────────────────────
+
+const MANUAL_QA_EXAMPLES: Record<string, string> = {
+  'What is Manual QA': `## Manual QA Overview
+
+Manual QA (Quality Assurance) is the human-led process of verifying
+that software meets requirements and works correctly for end users.
+
+### Key responsibilities:
+- Understand requirements and acceptance criteria
+- Design test cases and test plans
+- Execute tests and record results
+- Report defects clearly and reproducibly
+- Verify fixes and perform regression testing
+
+### When manual QA outperforms automation:
+✅ Exploratory testing — finding unexpected bugs
+✅ Usability and UX review
+✅ One-off or rarely run scenarios
+✅ Visual / layout validation
+✅ Early prototypes where the UI changes frequently
+
+### QA does NOT mean:
+❌ Only finding bugs at the end of development
+❌ Just executing test scripts without thinking
+❌ A gate that slows delivery
+
+### Goal:
+Shift quality left — involve QA from requirements through release.`,
+
+  'Test Case Design Techniques': `## Test Case Design Techniques
+
+### 1. Equivalence Partitioning
+Divide input into valid and invalid partitions.
+Test one value from each partition.
+
+Age field (valid: 18–65):
+  Valid partition:   30       → should pass
+  Invalid (low):     5        → should fail
+  Invalid (high):   80        → should fail
+
+---
+
+### 2. Boundary Value Analysis (BVA)
+Test at and around boundaries where bugs cluster.
+
+For age 18–65:
+  Test: 17, 18, 19, 64, 65, 66
+
+---
+
+### 3. Decision Table Testing
+Map conditions to expected actions.
+
+| Logged In | Has Subscription | Action         |
+|-----------|-----------------|----------------|
+| No        | —               | Redirect login |
+| Yes       | No              | Show upgrade   |
+| Yes       | Yes             | Show content   |
+
+---
+
+### 4. State Transition Testing
+Test all valid state changes and invalid transitions.
+
+Order states: Created → Paid → Shipped → Delivered
+Invalid: Shipped → Created (should be blocked)
+
+---
+
+### 5. Exploratory Testing
+No script — use the app as a real user would.
+Session-based: 60–90 min with a charter (goal + scope).`,
+
+  'Writing Effective Test Cases': `## Test Case Template
+
+Test Case ID: TC-LOGIN-001
+Title:        Login with valid credentials
+Module:       Authentication
+Priority:     High
+Preconditions:
+  - User account exists (email: test@example.com, pass: Test@1234)
+  - App is on the login page
+
+Steps:
+  1. Enter email: test@example.com
+  2. Enter password: Test@1234
+  3. Click "Sign In"
+
+Expected Result:
+  - User is redirected to the dashboard
+  - Username appears in the header
+  - Session cookie is set
+
+Actual Result:   [filled during execution]
+Status:          Pass / Fail / Blocked
+
+---
+
+## Negative Test Case
+
+Test Case ID: TC-LOGIN-002
+Title:        Login with incorrect password
+Priority:     High
+
+Steps:
+  1. Enter email: test@example.com
+  2. Enter password: WrongPass
+  3. Click "Sign In"
+
+Expected Result:
+  - Error message: "Invalid email or password"
+  - User stays on login page
+  - No session is created`,
+
+  'Test Execution and Defect Reporting': `## Defect Report Template
+
+Bug ID:      BUG-2024-045
+Title:       Checkout button disabled after valid payment details entered
+Module:      Checkout / Payment
+Severity:    Critical
+Priority:    High
+Environment: Chrome 124, macOS 14, Staging v2.3.1
+Found by:    QA Engineer
+Date:        2024-05-10
+
+Steps to Reproduce:
+  1. Add any item to cart
+  2. Go to checkout
+  3. Enter valid card: 4111 1111 1111 1111, CVV: 123, Expiry: 12/26
+  4. Observe the "Place Order" button
+
+Expected:    Button is enabled and clickable
+Actual:      Button remains disabled — order cannot be placed
+
+Attachments: screenshot.png, screen-recording.mp4
+
+Root cause hypothesis:
+  Card validation JS regex may reject valid test numbers.
+
+---
+
+## Bug Severity vs Priority
+
+Severity (impact):   Critical > High > Medium > Low
+Priority (fix order): P1 > P2 > P3 > P4
+
+Example:
+  Typo in footer text  → Low severity, Low priority
+  Crash on checkout    → Critical severity, P1 priority
+  Wrong color on banner → Low severity, Low priority (but client may escalate)`,
+
+  'API Testing with Postman': `## API Testing with Postman
+
+### Basic GET request
+GET https://api.example.com/users/1
+Authorization: Bearer {{token}}
+
+Expected response (200 OK):
+{
+  "id": 1,
+  "name": "Alice",
+  "email": "alice@example.com"
+}
+
+---
+
+### POST request with body
+POST https://api.example.com/users
+Content-Type: application/json
+Body:
+{
+  "name": "Bob",
+  "email": "bob@example.com"
+}
+
+Expected: 201 Created with user object
+
+---
+
+### Postman Test Scripts (JavaScript)
+pm.test("Status is 200", () => {
+  pm.response.to.have.status(200);
+});
+
+pm.test("Response has id", () => {
+  const body = pm.response.json();
+  pm.expect(body).to.have.property("id");
+  pm.expect(body.id).to.be.a("number");
+});
+
+pm.test("Response time < 500ms", () => {
+  pm.expect(pm.response.responseTime).to.be.below(500);
+});
+
+---
+
+### Environment variables
+Base URL: {{base_url}}
+Token:    {{auth_token}}
+
+Use Postman Collections + Environments to run the
+same tests against dev, staging, and production.`,
+
+  'Regression Testing and Smoke Testing': `## Smoke Testing vs Regression Testing
+
+### Smoke Test (Build Verification Test)
+- Run after each new build
+- Covers only critical paths — fast (< 30 min)
+- Goal: confirm the build is stable enough for full testing
+
+Smoke test checklist:
+  ✅ App loads without crash
+  ✅ Login / logout works
+  ✅ Core navigation accessible
+  ✅ Basic CRUD on main entity (e.g., create order)
+  ✅ Payment flow reachable (not full checkout)
+
+If smoke fails → reject build, notify dev team immediately.
+
+---
+
+### Regression Test
+- Run after any code change to verify no existing feature broke
+- Full suite or risk-based subset
+
+Risk-based regression strategy:
+  1. Identify changed modules from the diff
+  2. Map to dependent features (impact analysis)
+  3. Prioritize test cases covering those areas
+  4. Run smoke + impacted area first
+  5. Run full suite overnight / on CI
+
+---
+
+### Regression in Agile
+- Automate regression where possible (Selenium, Playwright)
+- Manual regression focus: new UI, complex user flows, integrations
+- Run before every sprint demo`,
+};
+
+// ─── Automation QA examples ───────────────────────────────────────────────────
+
+const AUTOMATION_QA_EXAMPLES: Record<string, string> = {
+  'What is Automation QA': `## What is Automation QA?
+
+Automation QA uses code and tools to execute tests automatically,
+replacing or supplementing repetitive manual execution.
+
+### Key benefits:
+✅ Fast feedback — run thousands of tests in minutes
+✅ Consistent — no human error in execution
+✅ Repeatable — run on every commit (CI/CD)
+✅ Parallel execution across browsers and environments
+
+### Automation pyramid (bottom = most tests):
+         /\\
+        /E2E\\       ← few, slow, expensive
+       /------\\
+      /  Integration\\  ← medium count
+     /--------------\\
+    /    Unit Tests   \\  ← many, fast, cheap
+   /------------------\\
+
+### Best candidates for automation:
+✅ Regression suites run on every build
+✅ Smoke tests run on every deployment
+✅ Data-driven scenarios with many input combinations
+✅ API contract testing
+✅ Performance benchmarks
+
+### Poor candidates:
+❌ One-off manual tests
+❌ Rapidly changing UI (high maintenance)
+❌ Subjective UX / visual design review`,
+
+  'Selenium WebDriver Basics': `// Selenium WebDriver — Java example
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
+
+public class LoginTest {
+
+    public static void main(String[] args) {
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            driver.get("https://example.com/login");
+
+            // Locate elements
+            WebElement emailInput = driver.findElement(By.id("email"));
+            WebElement passInput  = driver.findElement(By.id("password"));
+            WebElement loginBtn   = driver.findElement(By.cssSelector("button[type=submit]"));
+
+            // Interact
+            emailInput.sendKeys("user@example.com");
+            passInput.sendKeys("secret");
+            loginBtn.click();
+
+            // Explicit wait — avoid Thread.sleep()
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement dashboard = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.id("dashboard"))
+            );
+
+            System.out.println("Login passed: " + dashboard.isDisplayed());
+
+        } finally {
+            driver.quit();  // always close the browser
+        }
+    }
+}`,
+
+  'Page Object Model (POM)': `// Page Object Model — separates UI locators from test logic
+
+// LoginPage.java — Page Object
+public class LoginPage {
+    private final WebDriver driver;
+
+    // Locators defined once — easy to update when UI changes
+    private final By emailInput = By.id("email");
+    private final By passInput  = By.id("password");
+    private final By loginBtn   = By.cssSelector("button[type=submit]");
+    private final By errorMsg   = By.className("error-message");
+
+    public LoginPage(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void enterEmail(String email) {
+        driver.findElement(emailInput).sendKeys(email);
+    }
+
+    public void enterPassword(String password) {
+        driver.findElement(passInput).sendKeys(password);
+    }
+
+    public DashboardPage clickLogin() {
+        driver.findElement(loginBtn).click();
+        return new DashboardPage(driver);   // return next page object
+    }
+
+    public String getErrorMessage() {
+        return driver.findElement(errorMsg).getText();
+    }
+}
+
+---
+
+// LoginTest.java — clean test using POM
+public class LoginTest {
+    @Test
+    public void loginWithValidCredentials() {
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.enterEmail("user@example.com");
+        loginPage.enterPassword("secret");
+        DashboardPage dashboard = loginPage.clickLogin();
+        assertTrue(dashboard.isLoaded());
+    }
+}`,
+
+  'Playwright and Modern Testing Tools': `// Playwright — TypeScript (recommended for modern web testing)
+import { test, expect } from '@playwright/test';
+
+test.describe('Login flow', () => {
+  test('login with valid credentials', async ({ page }) => {
+    await page.goto('/login');
+
+    await page.fill('#email',    'user@example.com');
+    await page.fill('#password', 'secret');
+    await page.click('button[type=submit]');
+
+    // Auto-waits — no explicit waits needed
+    await expect(page).toHaveURL('/dashboard');
+    await expect(page.locator('#welcome')).toContainText('Welcome');
+  });
+
+  test('shows error on invalid password', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('#email',    'user@example.com');
+    await page.fill('#password', 'wrong');
+    await page.click('button[type=submit]');
+
+    await expect(page.locator('.error')).toBeVisible();
+    await expect(page.locator('.error')).toContainText('Invalid');
+  });
+});
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+export default defineConfig({
+  testDir: './tests',
+  use: {
+    baseURL: 'http://localhost:3000',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+  projects: [
+    { name: 'chromium', use: { browserName: 'chromium' } },
+    { name: 'firefox',  use: { browserName: 'firefox'  } },
+    { name: 'webkit',   use: { browserName: 'webkit'   } },
+  ],
+});`,
+
+  'CI/CD Integration for Tests': `# .github/workflows/tests.yml
+# Run automated tests on every push and pull request
+
+name: Automated Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - run: npm test -- --coverage
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests   # run after unit tests pass
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      - name: Start app
+        run: npm run build && npm run start &
+      - name: Wait for app
+        run: npx wait-on http://localhost:3000
+      - name: Run E2E tests
+        run: npx playwright test
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/`,
+
+  'BDD with Cucumber and Gherkin': `# Feature file — written in Gherkin (human-readable)
+# features/login.feature
+
+Feature: User Login
+  As a registered user
+  I want to log in to the application
+  So that I can access my account
+
+  Scenario: Successful login with valid credentials
+    Given I am on the login page
+    When  I enter email "user@example.com" and password "secret"
+    And   I click the login button
+    Then  I should be redirected to the dashboard
+    And   I should see "Welcome, Alice"
+
+  Scenario: Failed login with wrong password
+    Given I am on the login page
+    When  I enter email "user@example.com" and password "wrong"
+    And   I click the login button
+    Then  I should see the error "Invalid email or password"
+    And   I should remain on the login page
+
+---
+
+// Step definitions — Java + Selenium
+@Given("I am on the login page")
+public void iAmOnLoginPage() {
+    driver.get(BASE_URL + "/login");
+}
+
+@When("I enter email {string} and password {string}")
+public void iEnterCredentials(String email, String pass) {
+    new LoginPage(driver).enterEmail(email).enterPassword(pass);
+}
+
+@Then("I should be redirected to the dashboard")
+public void iShouldBeOnDashboard() {
+    assertEquals(BASE_URL + "/dashboard", driver.getCurrentUrl());
+}`,
+
+  'Handling Dynamic Elements': `// Playwright — strategies for dynamic / async elements
+
+import { test, expect, Page } from '@playwright/test';
+
+test('handle dynamic loading', async ({ page }) => {
+  await page.goto('/products');
+
+  // Wait for specific element
+  await page.waitForSelector('.product-card', { state: 'visible' });
+
+  // Wait for network idle (all requests done)
+  await page.waitForLoadState('networkidle');
+
+  // Wait for a specific response
+  const [response] = await Promise.all([
+    page.waitForResponse('**/api/products'),
+    page.click('#load-more'),
+  ]);
+  expect(response.status()).toBe(200);
+});
+
+// Handle elements that may not exist yet
+async function waitForToast(page: Page, message: string) {
+  const toast = page.locator('.toast', { hasText: message });
+  await expect(toast).toBeVisible({ timeout: 5000 });
+  await expect(toast).toBeHidden({ timeout: 5000 });
+}
+
+// Intercept and mock API responses
+test('show empty state when no products', async ({ page }) => {
+  await page.route('**/api/products', route =>
+    route.fulfill({ json: [] })
+  );
+  await page.goto('/products');
+  await expect(page.locator('.empty-state')).toBeVisible();
+});`,
+};
+
 const createCodeExample = (topicId: string, moduleName: string): string => {
   if (topicId === 'php') {
     return PHP_EXAMPLES[moduleName] ?? `<?php
@@ -2841,6 +4115,121 @@ jobs:
       - name: Notify on failure
         if: failure()
         run: echo "Pipeline failed — check logs above"`;
+  }
+
+  if (topicId === 'vuejs') {
+    return VUEJS_EXAMPLES[moduleName] ?? `<!-- ${moduleName} — Vue.js example -->
+<template>
+  <div>
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+    <button @click="handleAction">Run Action</button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+
+const title       = ref('${moduleName}')
+const description = ref('Implement ${moduleName} following Vue 3 Composition API patterns.')
+
+function handleAction() {
+  console.log('${moduleName} action triggered')
+}
+</script>`;
+  }
+
+  if (topicId === 'postgresql') {
+    return POSTGRESQL_EXAMPLES[moduleName] ?? `-- ${moduleName} — PostgreSQL example
+
+-- Always use parameterized queries to prevent SQL injection
+-- $1, $2 ... are placeholders (filled by the driver)
+
+PREPARE example_query (text) AS
+  SELECT id, name, created_at
+  FROM   items
+  WHERE  category = $1
+  ORDER  BY created_at DESC
+  LIMIT  20;
+
+EXECUTE example_query ('${moduleName}');
+
+-- Index the column you filter or sort on:
+CREATE INDEX IF NOT EXISTS idx_items_category
+  ON items (category);
+
+-- Check query plan:
+EXPLAIN ANALYZE
+  SELECT * FROM items WHERE category = '${moduleName}';`;
+  }
+
+  if (topicId === 'manual-qa') {
+    return MANUAL_QA_EXAMPLES[moduleName] ?? `## ${moduleName} — Manual QA Guide
+
+### Objective
+Understand and apply "${moduleName}" in a QA context.
+
+### Test Scenario
+Feature under test: ${moduleName}
+
+Steps:
+  1. Review requirements and acceptance criteria
+  2. Identify positive (happy path) test cases
+  3. Identify negative (error path) test cases
+  4. Identify boundary and edge cases
+  5. Execute and record results
+
+### Sample Test Cases
+
+TC-001: Verify happy path
+  Given: Prerequisites are met
+  When:  User performs the primary action
+  Then:  Expected outcome matches requirements
+  Status: Pass / Fail
+
+TC-002: Verify error handling
+  Given: Invalid data or missing prerequisites
+  When:  User performs the action
+  Then:  Appropriate error is shown without crash
+  Status: Pass / Fail
+
+### Defect Template (if fail)
+  Title: [brief description]
+  Steps to reproduce: [numbered list]
+  Expected: [what should happen]
+  Actual:   [what happened]
+  Severity: Critical / High / Medium / Low`;
+  }
+
+  if (topicId === 'automation-qa') {
+    return AUTOMATION_QA_EXAMPLES[moduleName] ?? `// ${moduleName} — Automation QA example (Playwright / TypeScript)
+import { test, expect } from '@playwright/test';
+
+test.describe('${moduleName}', () => {
+  test('verify primary functionality', async ({ page }) => {
+    // Arrange
+    await page.goto('/');
+
+    // Act — interact with the feature under test
+    await page.click('[data-testid="primary-action"]');
+
+    // Assert
+    await expect(page.locator('[data-testid="result"]')).toBeVisible();
+  });
+
+  test('verify error state', async ({ page }) => {
+    // Mock API to return error
+    await page.route('**/api/resource', route =>
+      route.fulfill({ status: 500, body: 'Server Error' })
+    );
+
+    await page.goto('/');
+    await page.click('[data-testid="primary-action"]');
+
+    // Error feedback should be visible
+    await expect(page.locator('[data-testid="error-message"]')).toBeVisible();
+  });
+});`;
   }
 
   if (topicId === 'agile') {
