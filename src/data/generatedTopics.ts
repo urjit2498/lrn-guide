@@ -46,10 +46,16 @@ const TOPIC_MODULES: Record<string, string[]> = {
     'Sessions and Cookies',
     'File Handling in PHP',
     'Object-Oriented PHP Basics',
+    'Interfaces, Abstract Classes, and Traits',
+    'Magic Methods and Late Static Binding',
     'Error Handling and Exceptions',
     'PDO and Database Access',
+    'PHP 8 Features',
     'Authentication and Authorization',
     'REST API Development',
+    'Design Patterns in PHP',
+    'SOLID Principles in PHP',
+    'Namespaces and PSR Standards',
     'Composer and Dependency Management',
     'Testing PHP Applications',
     'Security Best Practices',
@@ -64,15 +70,19 @@ const TOPIC_MODULES: Record<string, string[]> = {
     'Blade Templating',
     'Form Request Validation',
     'Eloquent Models and ORM Basics',
-    'Eloquent Relationships',
+    'Eloquent Relationships and N+1 Problem',
     'Migrations and Seeders',
     'Authentication in Laravel',
     'Authorization with Gates and Policies',
     'Middleware and Request Pipelines',
     'API Resources and Response Formatting',
     'Service Container and Dependency Injection',
+    'Service Providers and Bootstrapping',
+    'Laravel Collections API',
+    'Repository Pattern in Laravel',
     'Queues and Jobs',
     'Events and Listeners',
+    'Task Scheduling',
     'Testing with PHPUnit and Pest',
     'Caching, Performance, and Optimization',
     'Deployment and Environment Configuration',
@@ -132,36 +142,36 @@ const TOPIC_MODULES: Record<string, string[]> = {
     'Indexes and Query Performance',
     'Constraints and Data Integrity',
     'Transactions and ACID Properties',
+    'Isolation Levels and Locking',
     'Stored Procedures and Views',
     'Query Optimization with EXPLAIN',
+    'Window Functions and CTEs',
     'Pagination and Large Data Handling',
-    'Backup and Recovery',
     'Replication and High Availability',
+    'Backup and Recovery',
     'Security and Access Control',
     'MySQL in Application Architecture',
-    'MySQL vs MongoDB',
     'Common Performance Bottlenecks',
-    'Troubleshooting Production Issues',
     'MySQL Interview Case Studies',
   ],
   mongodb: [
     'What is MongoDB',
     'Documents and Collections',
     'CRUD Operations in MongoDB',
-    'Schema Design Strategies',
     'Embedding vs Referencing',
+    'Schema Design Strategies',
     'Indexes and Query Optimization',
     'Aggregation Pipeline Basics',
     'Advanced Aggregation Patterns',
     'Data Validation and Schema Governance',
+    'Transactions and Consistency',
     'Replica Sets and High Availability',
     'Sharding and Horizontal Scaling',
-    'Transactions and Consistency',
+    'Change Streams and Real-time Data',
     'MongoDB Security',
-    'Backup and Disaster Recovery',
     'Performance Tuning',
-    'Monitoring and Observability',
     'MongoDB in Microservices',
+    'Backup and Disaster Recovery',
     'MongoDB vs MySQL',
     'Common Production Mistakes',
     'MongoDB Interview Scenarios',
@@ -247,11 +257,12 @@ const TOPIC_MODULES: Record<string, string[]> = {
     'Composables and the Composition API',
     'Forms and v-model',
     'HTTP Requests with Axios',
+    'Provide and Inject Pattern',
     'Slots and Dynamic Components',
-    'Transitions and Animations',
+    'Teleport and Suspense',
+    'Options API vs Composition API',
     'Performance Optimization',
     'Testing Vue Applications',
-    'Vue 3 Migration from Vue 2',
     'Vue.js Interview Trade-offs',
   ],
   postgresql: [
@@ -320,6 +331,160 @@ const TOPIC_MODULES: Record<string, string[]> = {
     'Common Automation Mistakes',
     'Automation QA Interview Scenarios',
   ],
+};
+
+// Per-topic module splits by level. Topics listed here override the flat TOPIC_MODULES list.
+// Topics NOT listed here continue to show all modules at every level (existing behaviour).
+const TOPIC_LEVEL_MODULES: Partial<Record<string, Record<Level, string[]>>> = {
+  php: {
+    beginner: [
+      'What is PHP',
+      'PHP Setup and Environment',
+      'Syntax, Variables, and Data Types',
+      'Operators and Expressions',
+      'Control Flow Statements',
+      'Functions and Scope',
+      'Arrays and Associative Arrays',
+    ],
+    intermediate: [
+      'Forms and User Input Handling',
+      'Sessions and Cookies',
+      'File Handling in PHP',
+      'Object-Oriented PHP Basics',
+      'Interfaces, Abstract Classes, and Traits',
+      'Magic Methods and Late Static Binding',
+      'Error Handling and Exceptions',
+      'PDO and Database Access',
+    ],
+    advanced: [
+      'PHP 8 Features',
+      'Authentication and Authorization',
+      'REST API Development',
+      'Design Patterns in PHP',
+      'SOLID Principles in PHP',
+      'Namespaces and PSR Standards',
+      'Composer and Dependency Management',
+      'Testing PHP Applications',
+      'Security Best Practices',
+      'PHP Interview Problem Solving',
+    ],
+  },
+  laravel: {
+    beginner: [
+      'What is Laravel',
+      'Laravel Installation and Project Structure',
+      'Routing and Route Groups',
+      'Controllers and Request Lifecycle',
+      'Blade Templating',
+      'Form Request Validation',
+      'Eloquent Models and ORM Basics',
+    ],
+    intermediate: [
+      'Eloquent Relationships and N+1 Problem',
+      'Migrations and Seeders',
+      'Authentication in Laravel',
+      'Authorization with Gates and Policies',
+      'Middleware and Request Pipelines',
+      'API Resources and Response Formatting',
+      'Service Container and Dependency Injection',
+      'Laravel Collections API',
+    ],
+    advanced: [
+      'Service Providers and Bootstrapping',
+      'Repository Pattern in Laravel',
+      'Queues and Jobs',
+      'Events and Listeners',
+      'Task Scheduling',
+      'Testing with PHPUnit and Pest',
+      'Caching, Performance, and Optimization',
+      'Laravel Interview Architectures',
+    ],
+  },
+  mysql: {
+    beginner: [
+      'What is MySQL',
+      'Database Design Fundamentals',
+      'Normalization and Denormalization',
+      'SQL CRUD Operations',
+      'Filtering and Sorting Data',
+      'JOINs and Relationships',
+      'Constraints and Data Integrity',
+    ],
+    intermediate: [
+      'Indexes and Query Performance',
+      'Transactions and ACID Properties',
+      'Isolation Levels and Locking',
+      'Stored Procedures and Views',
+      'Query Optimization with EXPLAIN',
+      'Window Functions and CTEs',
+      'Pagination and Large Data Handling',
+    ],
+    advanced: [
+      'Replication and High Availability',
+      'Backup and Recovery',
+      'Security and Access Control',
+      'MySQL in Application Architecture',
+      'Common Performance Bottlenecks',
+      'MySQL Interview Case Studies',
+    ],
+  },
+  mongodb: {
+    beginner: [
+      'What is MongoDB',
+      'Documents and Collections',
+      'CRUD Operations in MongoDB',
+      'Embedding vs Referencing',
+      'Schema Design Strategies',
+      'Indexes and Query Optimization',
+    ],
+    intermediate: [
+      'Aggregation Pipeline Basics',
+      'Advanced Aggregation Patterns',
+      'Data Validation and Schema Governance',
+      'Transactions and Consistency',
+      'Replica Sets and High Availability',
+      'MongoDB Security',
+      'Performance Tuning',
+    ],
+    advanced: [
+      'Sharding and Horizontal Scaling',
+      'Change Streams and Real-time Data',
+      'MongoDB in Microservices',
+      'Backup and Disaster Recovery',
+      'MongoDB vs MySQL',
+      'Common Production Mistakes',
+      'MongoDB Interview Scenarios',
+    ],
+  },
+  vuejs: {
+    beginner: [
+      'What is Vue.js',
+      'Vue CLI and Project Setup',
+      'Template Syntax and Directives',
+      'Data Binding and Reactivity',
+      'Components and Props',
+      'Component Events and Emits',
+      'Computed Properties and Watchers',
+    ],
+    intermediate: [
+      'Lifecycle Hooks',
+      'Vue Router Basics',
+      'Navigation Guards and Route Meta',
+      'Pinia State Management',
+      'Composables and the Composition API',
+      'Forms and v-model',
+      'HTTP Requests with Axios',
+      'Provide and Inject Pattern',
+    ],
+    advanced: [
+      'Slots and Dynamic Components',
+      'Teleport and Suspense',
+      'Options API vs Composition API',
+      'Performance Optimization',
+      'Testing Vue Applications',
+      'Vue.js Interview Trade-offs',
+    ],
+  },
 };
 
 const topicVsComparisons: Record<string, string> = {
@@ -691,6 +856,572 @@ if ($method === 'POST' && $path === '/api/users') {
 
 http_response_code(404);
 echo json_encode(['error' => 'Route not found']);`,
+
+  'File Handling in PHP': `<?php
+declare(strict_types=1);
+
+// Read entire file (small files only)
+$content = file_get_contents('/var/log/app.log');
+
+// Write (overwrite) — use FILE_APPEND to append
+file_put_contents('/tmp/output.txt', "Line one\n");
+file_put_contents('/tmp/output.txt', "Line two\n", FILE_APPEND);
+
+// Stream large files line-by-line (memory efficient)
+$handle = fopen('/var/data/large.csv', 'r');
+if ($handle === false) {
+    throw new RuntimeException('Cannot open file.');
+}
+
+try {
+    while (($row = fgetcsv($handle)) !== false) {
+        [$id, $name, $email] = $row;
+        // process each row...
+    }
+} finally {
+    fclose($handle);  // always close
+}
+
+// Check path safety before user-supplied filenames
+function safeReadFile(string $basePath, string $userFile): string
+{
+    $real = realpath($basePath . DIRECTORY_SEPARATOR . basename($userFile));
+    if ($real === false || !str_starts_with($real, realpath($basePath))) {
+        throw new RuntimeException('Path traversal attempt.');
+    }
+    return file_get_contents($real);
+}`,
+
+  'Authentication and Authorization': `<?php
+declare(strict_types=1);
+
+// Password hashing — never store plain text
+$hash = password_hash('secret123', PASSWORD_BCRYPT, ['cost' => 12]);
+
+// Verify at login
+$valid = password_verify('secret123', $hash);  // true
+
+// Role-based access check
+function requireRole(string $requiredRole): void
+{
+    $userRole = $_SESSION['role'] ?? 'guest';
+
+    if ($userRole !== $requiredRole) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden']);
+        exit;
+    }
+}
+
+// CSRF token generation and verification
+function generateCsrfToken(): string
+{
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken(string $token): bool
+{
+    return hash_equals($_SESSION['csrf_token'] ?? '', $token);
+}`,
+
+  'Interfaces, Abstract Classes, and Traits': `<?php
+declare(strict_types=1);
+
+// Interface: pure contract — no implementation
+interface Notifiable {
+    public function notify(string $message): void;
+    public function getChannel(): string;
+}
+
+// Abstract class: shared implementation + enforced contracts
+abstract class BaseNotifier implements Notifiable {
+    abstract public function getChannel(): string;
+
+    public function notify(string $message): void
+    {
+        echo "[{$this->getChannel()}] $message";
+    }
+}
+
+// Concrete class
+class EmailNotifier extends BaseNotifier {
+    public function getChannel(): string { return 'email'; }
+}
+
+// Trait: horizontal code reuse (not inheritance)
+trait Timestamps {
+    private ?\\DateTime $createdAt = null;
+
+    public function setCreatedAt(): void
+    {
+        $this->createdAt = new \\DateTime();
+    }
+
+    public function getCreatedAt(): ?\\DateTime { return $this->createdAt; }
+}
+
+class User {
+    use Timestamps;   // mixin — no parent class needed
+    public function __construct(public readonly string $email) {}
+}
+
+// Key difference:
+// Interface — what a class CAN DO (contract)
+// Abstract  — what a class IS (shared base)
+// Trait     — reusable behaviour across unrelated classes`,
+
+  'Magic Methods and Late Static Binding': `<?php
+declare(strict_types=1);
+
+class MagicDemo {
+    private array $data = [];
+
+    // __get / __set: intercept property access on non-existent props
+    public function __get(string $name): mixed
+    {
+        return $this->data[$name] ?? null;
+    }
+
+    public function __set(string $name, mixed $value): void
+    {
+        $this->data[$name] = $value;
+    }
+
+    // __toString: cast to string
+    public function __toString(): string
+    {
+        return json_encode($this->data);
+    }
+
+    // __invoke: call object as a function
+    public function __invoke(string $arg): string
+    {
+        return "Invoked with $arg";
+    }
+}
+
+$obj = new MagicDemo();
+$obj->name = 'Alice';        // triggers __set
+echo $obj->name;             // triggers __get → Alice
+echo $obj;                   // triggers __toString
+echo $obj('test');           // triggers __invoke
+
+// Late Static Binding — static:: resolves to the actual called class
+class ParentModel {
+    public static function create(): static {
+        return new static();   // static:: not self:: — correct for inheritance
+    }
+}
+
+class ChildModel extends ParentModel {}
+
+$child = ChildModel::create();  // returns ChildModel, not ParentModel`,
+
+  'PHP 8 Features': `<?php
+declare(strict_types=1);
+
+// Named arguments (PHP 8.0) — skip optional params by name
+echo str_pad(string: 'hi', length: 10, pad_type: STR_PAD_LEFT);
+
+// Union types (PHP 8.0)
+function processId(int|string $id): string
+{
+    return "ID: $id";
+}
+
+// Match expression (PHP 8.0) — strict, no fall-through
+$status = 'active';
+$label = match($status) {
+    'active'   => 'Active',
+    'inactive' => 'Inactive',
+    default    => 'Unknown',
+};
+
+// Nullsafe operator (PHP 8.0)
+$city = $user?->getAddress()?->getCity();
+
+// Enums (PHP 8.1) — type-safe constants
+enum Status: string {
+    case Active   = 'active';
+    case Inactive = 'inactive';
+    case Banned   = 'banned';
+
+    public function label(): string {
+        return match($this) {
+            Status::Active   => 'Active User',
+            Status::Inactive => 'Inactive',
+            Status::Banned   => 'Banned',
+        };
+    }
+}
+
+// Readonly properties (PHP 8.1)
+class Point {
+    public function __construct(
+        public readonly float $x,
+        public readonly float $y,
+    ) {}
+}
+
+// Fibers (PHP 8.1) — cooperative concurrency (coroutines)
+$fiber = new Fiber(function(): void {
+    $value = Fiber::suspend('first');
+    echo "Got: $value";
+});
+$first = $fiber->start();   // 'first'
+$fiber->resume('hello');    // echoes: Got: hello`,
+
+  'Design Patterns in PHP': `<?php
+declare(strict_types=1);
+
+// --- Repository Pattern ---
+interface UserRepository {
+    public function findById(int $id): ?array;
+    public function save(array $user): void;
+}
+
+class MysqlUserRepository implements UserRepository {
+    public function __construct(private \\PDO $pdo) {}
+
+    public function findById(int $id): ?array {
+        $stmt = $this->pdo->prepare('SELECT * FROM users WHERE id = ?');
+        $stmt->execute([$id]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function save(array $user): void {
+        // INSERT or UPDATE logic...
+    }
+}
+
+// --- Factory Pattern ---
+interface Logger { public function log(string $msg): void; }
+class FileLogger    implements Logger { public function log(string $msg): void { file_put_contents('/tmp/app.log', $msg . PHP_EOL, FILE_APPEND); } }
+class ConsoleLogger implements Logger { public function log(string $msg): void { echo $msg . PHP_EOL; } }
+
+class LoggerFactory {
+    public static function create(string $type): Logger {
+        return match($type) {
+            'file'    => new FileLogger(),
+            'console' => new ConsoleLogger(),
+            default   => throw new InvalidArgumentException("Unknown logger: $type"),
+        };
+    }
+}
+
+// --- Observer Pattern ---
+interface Observer { public function update(string $event, mixed $data): void; }
+
+class EventEmitter {
+    private array $listeners = [];
+
+    public function on(string $event, Observer $observer): void {
+        $this->listeners[$event][] = $observer;
+    }
+
+    public function emit(string $event, mixed $data = null): void {
+        foreach ($this->listeners[$event] ?? [] as $obs) {
+            $obs->update($event, $data);
+        }
+    }
+}`,
+
+  'SOLID Principles in PHP': `<?php
+declare(strict_types=1);
+
+// S — Single Responsibility: one reason to change
+class InvoiceCalculator {
+    public function calculate(array $items): float {
+        return array_sum(array_column($items, 'price'));
+    }
+}
+class InvoicePrinter {
+    public function print(float $total): string {
+        return "Total: $$total";
+    }
+}
+
+// O — Open/Closed: open for extension, closed for modification
+interface Discount { public function apply(float $price): float; }
+class NoDiscount      implements Discount { public function apply(float $p): float { return $p; } }
+class PercentDiscount implements Discount {
+    public function __construct(private float $pct) {}
+    public function apply(float $p): float { return $p * (1 - $this->pct / 100); }
+}
+
+// L — Liskov Substitution: subclass must honour parent contract
+class Rectangle {
+    public function __construct(protected float $w, protected float $h) {}
+    public function area(): float { return $this->w * $this->h; }
+}
+// Square IS-A Rectangle only if we keep the contract intact
+
+// I — Interface Segregation: small focused interfaces
+interface Readable  { public function read(): string; }
+interface Writable  { public function write(string $data): void; }
+// Don't force a read-only class to implement write()
+
+// D — Dependency Inversion: depend on abstractions not concretions
+class OrderService {
+    public function __construct(
+        private UserRepository $users,   // interface, not MysqlUserRepository
+        private Logger $logger,          // interface, not FileLogger
+    ) {}
+}`,
+
+  'Namespaces and PSR Standards': `<?php
+// PSR-4 autoloading: namespace maps to directory path
+// Vendor\\Package\\SubPackage → vendor/package/sub-package/
+
+namespace App\\Services;
+
+use App\\Models\\User;
+use App\\Repositories\\UserRepository;
+use Illuminate\\Support\\Collection;
+
+class UserService
+{
+    public function __construct(
+        private readonly UserRepository $repo,
+    ) {}
+
+    public function getActiveUsers(): array
+    {
+        return $this->repo->findAll(['active' => true]);
+    }
+}
+
+// composer.json autoload section:
+// {
+//   "autoload": {
+//     "psr-4": {
+//       "App\\\\": "src/"
+//     }
+//   }
+// }
+// Run: composer dump-autoload
+
+// PSR-12 coding style enforced by tools:
+// ./vendor/bin/phpcs --standard=PSR12 src/
+// ./vendor/bin/php-cs-fixer fix src/
+
+// PSR-7 HTTP Message Interface (used by Slim, Guzzle)
+// $request->getMethod()   — GET, POST, etc.
+// $request->getUri()      — full URI object
+// $request->getBody()     — stream body`,
+
+  'Composer and Dependency Management': `<?php
+// composer.json — project manifest
+// {
+//   "require": {
+//     "php": "^8.2",
+//     "guzzlehttp/guzzle": "^7.0",
+//     "vlucas/phpdotenv":  "^5.5"
+//   },
+//   "require-dev": {
+//     "phpunit/phpunit": "^11.0",
+//     "pestphp/pest":    "^2.0"
+//   },
+//   "autoload": {
+//     "psr-4": { "App\\\\": "src/" }
+//   }
+// }
+
+// Key commands:
+// composer install          — install from composer.lock (CI/prod)
+// composer update           — update to newest allowed versions
+// composer require pkg/name — add a package
+// composer remove pkg/name  — remove a package
+// composer dump-autoload    — regenerate autoload files
+
+// Semantic versioning constraints:
+// ^1.2.3  — >=1.2.3 <2.0.0  (safe minor/patch updates)
+// ~1.2.3  — >=1.2.3 <1.3.0  (patch updates only)
+// 1.2.*   — any patch of 1.2
+// *       — any version (avoid in production)
+
+// ALWAYS commit composer.lock — ensures reproducible builds
+// NEVER commit vendor/ directory — add to .gitignore`,
+
+  'Testing PHP Applications': `<?php
+// tests/UserServiceTest.php — PHPUnit example
+use PHPUnit\\Framework\\TestCase;
+use PHPUnit\\Framework\\MockObject\\MockObject;
+
+class UserServiceTest extends TestCase
+{
+    private MockObject $repo;
+    private UserService $service;
+
+    protected function setUp(): void
+    {
+        $this->repo    = $this->createMock(UserRepository::class);
+        $this->service = new UserService($this->repo);
+    }
+
+    public function testGetActiveUsersCallsRepoWithCorrectFilter(): void
+    {
+        $this->repo
+            ->expects($this->once())
+            ->method('findAll')
+            ->with(['active' => true])
+            ->willReturn([['id' => 1, 'name' => 'Alice']]);
+
+        $result = $this->service->getActiveUsers();
+
+        $this->assertCount(1, $result);
+        $this->assertSame('Alice', $result[0]['name']);
+    }
+}
+
+// Using Pest (modern syntax):
+// test('active users are returned', function () {
+//     $repo = mock(UserRepository::class)
+//         ->shouldReceive('findAll')
+//         ->with(['active' => true])
+//         ->andReturn([['id' => 1, 'name' => 'Alice']]);
+//
+//     $service = new UserService($repo);
+//     expect($service->getActiveUsers())->toHaveCount(1);
+// });
+
+// Run: ./vendor/bin/phpunit
+// Coverage: ./vendor/bin/phpunit --coverage-html coverage/`,
+
+  'Security Best Practices': `<?php
+declare(strict_types=1);
+
+// 1. SQL Injection — ALWAYS use prepared statements
+$stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email');
+$stmt->execute([':email' => $email]);
+
+// 2. XSS — escape ALL output
+echo htmlspecialchars($userInput, ENT_QUOTES, 'UTF-8');
+
+// 3. Password hashing
+$hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+// Verify: password_verify($input, $hash)
+// Rehash when needed: password_needs_rehash($hash, PASSWORD_BCRYPT)
+
+// 4. CSRF protection — include token in every state-changing form
+session_start();
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+// Verify: hash_equals($_SESSION['csrf'], $_POST['_token'] ?? '')
+
+// 5. Secure headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Content-Security-Policy: default-src \'self\'');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// 6. File upload validation
+function validateUpload(array $file): void
+{
+    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    $finfo   = new finfo(FILEINFO_MIME_TYPE);
+    $mime    = $finfo->file($file['tmp_name']);   // check real type, not extension
+
+    if (!in_array($mime, $allowed, true)) {
+        throw new RuntimeException('Invalid file type.');
+    }
+    if ($file['size'] > 5 * 1024 * 1024) {
+        throw new RuntimeException('File too large (max 5 MB).');
+    }
+}`,
+
+  'Performance and Caching': `<?php
+declare(strict_types=1);
+
+// OPcache: caches compiled bytecode in memory (enable in php.ini)
+// opcache.enable = 1
+// opcache.memory_consumption = 256
+// opcache.max_accelerated_files = 20000
+
+// APCu: in-memory key/value cache (single server)
+$key  = "user_{$userId}";
+$user = apcu_fetch($key, $success);
+
+if (!$success) {
+    $user = fetchFromDatabase($userId);
+    apcu_store($key, $user, 300);  // cache 5 minutes
+}
+
+// Redis via Predis (shared cache across servers)
+$redis = new Predis\\Client(['host' => '127.0.0.1', 'port' => 6379]);
+
+$cached = $redis->get("product_{$id}");
+if ($cached === null) {
+    $product = fetchProduct($id);
+    $redis->setex("product_{$id}", 600, serialize($product));
+} else {
+    $product = unserialize($cached);
+}
+
+// Lazy loading — only compute when needed
+function expensiveReport(): \\Generator
+{
+    foreach (range(1, 10000) as $row) {
+        yield processRow($row);   // yield one row at a time, no memory spike
+    }
+}
+
+foreach (expensiveReport() as $row) {
+    output($row);
+}`,
+
+  'PHP Interview Problem Solving': `<?php
+declare(strict_types=1);
+
+// --- FizzBuzz (classic, but asked to test loop + modulo) ---
+for ($i = 1; $i <= 20; $i++) {
+    echo match(true) {
+        $i % 15 === 0 => 'FizzBuzz',
+        $i % 3  === 0 => 'Fizz',
+        $i % 5  === 0 => 'Buzz',
+        default        => (string) $i,
+    } . "\\n";
+}
+
+// --- Find duplicates in an array ---
+function findDuplicates(array $items): array
+{
+    $seen = $dupes = [];
+    foreach ($items as $item) {
+        if (isset($seen[$item])) {
+            $dupes[] = $item;
+        }
+        $seen[$item] = true;
+    }
+    return array_unique($dupes);
+}
+
+// --- Check balanced brackets ---
+function isBalanced(string $expr): bool
+{
+    $stack = [];
+    $pairs = [')' => '(', ']' => '[', '}' => '{'];
+
+    foreach (str_split($expr) as $ch) {
+        if (in_array($ch, ['(', '[', '{'])) {
+            $stack[] = $ch;
+        } elseif (isset($pairs[$ch])) {
+            if (array_pop($stack) !== $pairs[$ch]) return false;
+        }
+    }
+    return empty($stack);
+}
+
+// --- Fibonacci with memoization ---
+function fib(int $n, array &$memo = []): int
+{
+    if ($n <= 1) return $n;
+    return $memo[$n] ??= fib($n - 1, $memo) + fib($n - 2, $memo);
+}`,
 };
 
 const LARAVEL_EXAMPLES: Record<string, string> = {
@@ -959,6 +1690,599 @@ class SendWelcomeEmail implements ShouldQueue
 
 // Dispatch: SendWelcomeEmail::dispatch($user);
 // Worker:   php artisan queue:work --queue=emails`,
+
+  'Blade Templating': `{{-- resources/views/layouts/app.blade.php --}}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@yield('title', 'My App')</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body>
+    @include('partials.nav')
+    <main>
+        @yield('content')
+    </main>
+</body>
+</html>
+
+{{-- resources/views/users/index.blade.php --}}
+@extends('layouts.app')
+
+@section('title', 'Users')
+
+@section('content')
+    @forelse($users as $user)
+        <div class="card">
+            <strong>{{ $user->name }}</strong>
+            <span>{{ $user->email }}</span>
+            @if($user->isAdmin())
+                <span class="badge">Admin</span>
+            @endif
+        </div>
+    @empty
+        <p>No users found.</p>
+    @endforelse
+
+    {{ $users->links() }}  {{-- pagination links --}}
+@endsection
+
+{{-- Components (Laravel 8+): resources/views/components/alert.blade.php --}}
+@props(['type' => 'info', 'message'])
+<div class="alert alert-{{ $type }}">{{ $message }}</div>
+
+{{-- Usage: <x-alert type="success" message="Saved!" /> --}}`,
+
+  'Form Request Validation': `<?php
+namespace App\\Http\\Requests;
+
+use Illuminate\\Foundation\\Http\\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    // Only allow authenticated users to submit
+    public function authorize(): bool
+    {
+        return $this->user() !== null;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name'     => ['required', 'string', 'max:100'],
+            'email'    => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'min:8', 'confirmed'],
+            'role'     => ['required', 'in:admin,editor,viewer'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.unique' => 'This email is already registered.',
+        ];
+    }
+
+    // Transform/clean data before validation runs
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => strtolower(trim($this->email ?? '')),
+        ]);
+    }
+}
+
+// Controller usage:
+// public function store(StoreUserRequest $request) {
+//     $user = User::create($request->validated());
+//     ...
+// }
+// Validation runs automatically — 422 returned if it fails`,
+
+  'Authorization with Gates and Policies': `<?php
+// app/Providers/AuthServiceProvider.php
+use Illuminate\\Support\\Facades\\Gate;
+
+class AuthServiceProvider extends ServiceProvider {
+    public function boot(): void {
+        // Simple Gate — inline logic
+        Gate::define('view-reports', function (User $user) {
+            return in_array($user->role, ['admin', 'manager']);
+        });
+    }
+}
+
+// app/Policies/PostPolicy.php — resource-specific rules
+class PostPolicy {
+    public function update(User $user, Post $post): bool {
+        return $user->id === $post->user_id || $user->isAdmin();
+    }
+
+    public function delete(User $user, Post $post): bool {
+        return $user->isAdmin();
+    }
+}
+
+// Controller — multiple ways to check
+class PostController extends Controller {
+    public function update(Request $request, Post $post) {
+        $this->authorize('update', $post);   // throws 403 if denied
+        // ... proceed with update
+    }
+
+    public function destroy(Post $post) {
+        // Gate check inline
+        if (Gate::denies('delete', $post)) {
+            abort(403);
+        }
+    }
+}
+
+// Blade
+// @can('update', $post)
+//     <button>Edit</button>
+// @endcan`,
+
+  'API Resources and Response Formatting': `<?php
+namespace App\\Http\\Resources;
+
+use Illuminate\\Http\\Resources\\Json\\JsonResource;
+
+class UserResource extends JsonResource
+{
+    public function toArray($request): array
+    {
+        return [
+            'id'         => $this->id,
+            'name'       => $this->name,
+            'email'      => $this->email,
+            'role'       => $this->role,
+            'created_at' => $this->created_at->toISOString(),
+            // Conditional fields — only include if loaded
+            'posts'      => PostResource::collection($this->whenLoaded('posts')),
+            // Only show to admins
+            'phone'      => $this->when($request->user()?->isAdmin(), $this->phone),
+        ];
+    }
+}
+
+// ResourceCollection with pagination metadata
+class UserCollection extends ResourceCollection
+{
+    public function toArray($request): array
+    {
+        return [
+            'data' => $this->collection,
+            'meta' => [
+                'total'       => $this->total(),
+                'per_page'    => $this->perPage(),
+                'current_page'=> $this->currentPage(),
+            ],
+        ];
+    }
+}
+
+// Controller usage:
+// return new UserResource($user);              // single
+// return UserResource::collection($users);     // collection
+// return new UserCollection(User::paginate(20)); // paginated`,
+
+  'Service Container and Dependency Injection': `<?php
+// app/Providers/AppServiceProvider.php
+use App\\Services\\PaymentService;
+use App\\Services\\StripePaymentService;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        // Bind interface to concrete implementation
+        $this->app->bind(PaymentService::class, function ($app) {
+            return new StripePaymentService(
+                apiKey: config('services.stripe.key'),
+                logger: $app->make(Logger::class),
+            );
+        });
+
+        // Singleton — same instance throughout request lifecycle
+        $this->app->singleton(CacheManager::class, function ($app) {
+            return new CacheManager(config('cache.default'));
+        });
+    }
+}
+
+// The container automatically injects dependencies
+class OrderController extends Controller
+{
+    // Laravel resolves PaymentService automatically from container
+    public function __construct(
+        private readonly PaymentService $payment,
+    ) {}
+
+    public function charge(Request $request): JsonResponse
+    {
+        $result = $this->payment->charge(
+            amount: $request->integer('amount'),
+            token:  $request->string('token'),
+        );
+        return response()->json($result);
+    }
+}
+
+// Manual resolution: app(PaymentService::class)
+// or:              resolve(PaymentService::class)`,
+
+  'Eloquent Relationships and N+1 Problem': `<?php
+// One-to-Many
+class User extends Model {
+    public function posts(): HasMany {
+        return $this->hasMany(Post::class);
+    }
+}
+
+// Many-to-Many with pivot
+class Post extends Model {
+    public function tags(): BelongsToMany {
+        return $this->belongsToMany(Tag::class)
+                    ->withPivot('added_by')
+                    ->withTimestamps();
+    }
+    // Polymorphic: Post and Video both have comments
+    public function comments(): MorphMany {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+}
+
+// ❌ N+1 Problem — 1 + N queries (1 for posts, 1 per post for user)
+$posts = Post::all();
+foreach ($posts as $post) {
+    echo $post->user->name;   // queries DB every iteration
+}
+
+// ✅ Eager Loading — 2 queries total regardless of post count
+$posts = Post::with('user')->get();
+foreach ($posts as $post) {
+    echo $post->user->name;   // no extra query
+}
+
+// Eager loading with constraint
+$posts = Post::with(['comments' => function ($q) {
+    $q->where('approved', true)->latest()->limit(3);
+}])->get();
+
+// withCount: get count without loading all relations
+$users = User::withCount('posts')->get();
+echo $users->first()->posts_count;`,
+
+  'Service Providers and Bootstrapping': `<?php
+// Service providers are the central place to configure your application.
+// Every request passes through registered providers.
+
+// app/Providers/AppServiceProvider.php
+class AppServiceProvider extends ServiceProvider
+{
+    // register(): bind things into the container — no other services are available yet
+    public function register(): void
+    {
+        $this->app->singleton(CurrencyConverter::class, function ($app) {
+            return new CurrencyConverter(
+                baseCurrency: config('app.currency', 'USD'),
+            );
+        });
+    }
+
+    // boot(): runs after all providers are registered — safe to use other services
+    public function boot(): void
+    {
+        // Force HTTPS in production
+        if ($this->app->isProduction()) {
+            \\URL::forceScheme('https');
+        }
+
+        // Register a custom Blade directive
+        \\Blade::directive('money', function ($expression) {
+            return "<?php echo number_format($expression, 2); ?>";
+        });
+
+        // Register global Eloquent observer
+        User::observe(UserObserver::class);
+    }
+}
+
+// config/app.php — register in providers array:
+// App\\Providers\\AppServiceProvider::class
+
+// php artisan make:provider ReportingServiceProvider`,
+
+  'Laravel Collections API': `<?php
+use Illuminate\\Support\\Collection;
+
+$users = collect([
+    ['name' => 'Alice', 'role' => 'admin', 'score' => 95],
+    ['name' => 'Bob',   'role' => 'user',  'score' => 72],
+    ['name' => 'Carol', 'role' => 'admin', 'score' => 88],
+    ['name' => 'Dave',  'role' => 'user',  'score' => 55],
+]);
+
+// filter: keep matching items
+$admins = $users->filter(fn($u) => $u['role'] === 'admin');
+// [Alice, Carol]
+
+// map: transform each item
+$names = $users->map(fn($u) => strtoupper($u['name']));
+
+// pluck: extract single field
+$scores = $users->pluck('score');   // [95, 72, 88, 55]
+
+// groupBy: group by field value
+$byRole = $users->groupBy('role');
+// ['admin' => [...], 'user' => [...]]
+
+// sortByDesc + take: top 2 scorers
+$top2 = $users->sortByDesc('score')->take(2)->values();
+
+// reduce: compute aggregate
+$avgScore = $users->avg('score');   // 77.5
+
+// chunk: split into batches (useful for bulk processing)
+$users->chunk(2)->each(function ($batch) {
+    // process 2 at a time...
+});
+
+// Eloquent collections work the same way:
+// User::all()->groupBy('role')->map->count()`,
+
+  'Repository Pattern in Laravel': `<?php
+// Interface — what the repository must do
+namespace App\\Repositories;
+
+interface UserRepositoryInterface
+{
+    public function findById(int $id): ?\\App\\Models\\User;
+    public function findByEmail(string $email): ?\\App\\Models\\User;
+    public function paginate(int $perPage = 15): \\Illuminate\\Pagination\\LengthAwarePaginator;
+    public function create(array $data): \\App\\Models\\User;
+    public function update(int $id, array $data): bool;
+}
+
+// Eloquent implementation
+class EloquentUserRepository implements UserRepositoryInterface
+{
+    public function findById(int $id): ?\\App\\Models\\User
+    {
+        return \\App\\Models\\User::find($id);
+    }
+
+    public function findByEmail(string $email): ?\\App\\Models\\User
+    {
+        return \\App\\Models\\User::where('email', $email)->first();
+    }
+
+    public function paginate(int $perPage = 15): \\Illuminate\\Pagination\\LengthAwarePaginator
+    {
+        return \\App\\Models\\User::latest()->paginate($perPage);
+    }
+
+    public function create(array $data): \\App\\Models\\User
+    {
+        return \\App\\Models\\User::create($data);
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        return \\App\\Models\\User::where('id', $id)->update($data) > 0;
+    }
+}
+
+// Bind in AppServiceProvider:
+// $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
+
+// Benefits: swap Eloquent for raw PDO or API without touching business logic`,
+
+  'Events and Listeners': `<?php
+// app/Events/OrderPlaced.php
+class OrderPlaced
+{
+    public function __construct(
+        public readonly Order $order,
+        public readonly User  $user,
+    ) {}
+}
+
+// app/Listeners/SendOrderConfirmation.php
+class SendOrderConfirmation implements ShouldQueue   // async listener
+{
+    public function handle(OrderPlaced $event): void
+    {
+        Mail::to($event->user->email)
+            ->send(new OrderConfirmationMail($event->order));
+    }
+}
+
+// app/Listeners/UpdateInventory.php
+class UpdateInventory
+{
+    public function handle(OrderPlaced $event): void
+    {
+        foreach ($event->order->items as $item) {
+            Product::decrement('stock', $item->quantity, ['id' => $item->product_id]);
+        }
+    }
+}
+
+// Register in EventServiceProvider:
+// protected $listen = [
+//     OrderPlaced::class => [
+//         SendOrderConfirmation::class,  // queued
+//         UpdateInventory::class,        // sync
+//     ],
+// ];
+
+// Fire the event in your service:
+// event(new OrderPlaced($order, $user));
+// Or: OrderPlaced::dispatch($order, $user);`,
+
+  'Task Scheduling': `<?php
+// app/Console/Kernel.php
+class Kernel extends ConsoleKernel
+{
+    protected function schedule(Schedule $schedule): void
+    {
+        // Run every day at 1 AM — send a report email
+        $schedule->job(new GenerateDailyReport)
+                 ->dailyAt('01:00')
+                 ->onOneServer()       // only one server in a cluster runs this
+                 ->withoutOverlapping() // skip if previous run is still running
+                 ->emailOutputOnFailure('admin@example.com');
+
+        // Every 5 minutes — sync exchange rates
+        $schedule->command('rates:sync')
+                 ->everyFiveMinutes()
+                 ->runInBackground();
+
+        // Every Monday at 8 AM — prune old records
+        $schedule->call(function () {
+            \\DB::table('activity_log')
+                ->where('created_at', '<', now()->subDays(90))
+                ->delete();
+        })->weeklyOn(1, '08:00');
+
+        // Hourly between 9 AM and 5 PM on weekdays
+        $schedule->command('reports:cache')
+                 ->hourly()
+                 ->weekdays()
+                 ->between('09:00', '17:00');
+    }
+}
+
+// Cron entry on the server (one line — Laravel handles the rest):
+// * * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1`,
+
+  'Testing with PHPUnit and Pest': `<?php
+// Feature test (Pest) — tests a full HTTP endpoint
+use App\\Models\\User;
+use Illuminate\\Foundation\\Testing\\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+it('returns 401 when unauthenticated', function () {
+    $response = $this->getJson('/api/users');
+    $response->assertStatus(401);
+});
+
+it('returns paginated users for authenticated admin', function () {
+    $admin = User::factory()->admin()->create();
+    User::factory(5)->create();
+
+    $response = $this->actingAs($admin, 'sanctum')
+                     ->getJson('/api/users');
+
+    $response->assertOk()
+             ->assertJsonStructure(['data' => [['id', 'name', 'email']], 'meta']);
+});
+
+it('stores a new user with valid data', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin, 'sanctum')
+                     ->postJson('/api/users', [
+                         'name'  => 'Alice',
+                         'email' => 'alice@example.com',
+                         'role'  => 'editor',
+                     ]);
+
+    $response->assertCreated()->assertJsonPath('data.name', 'Alice');
+    $this->assertDatabaseHas('users', ['email' => 'alice@example.com']);
+});
+
+// Mock a service
+it('sends welcome email on user creation', function () {
+    Mail::fake();
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin, 'sanctum')
+         ->postJson('/api/users', [...]);
+
+    Mail::assertSent(WelcomeMail::class);
+});`,
+
+  'Caching, Performance, and Optimization': `<?php
+use Illuminate\\Support\\Facades\\Cache;
+
+// Store with expiry
+Cache::put('featured_products', $products, now()->addHours(2));
+
+// Remember: get from cache, or compute and store
+$popular = Cache::remember('popular_posts', 3600, function () {
+    return Post::withCount('views')
+               ->orderBy('views_count', 'desc')
+               ->limit(10)
+               ->get();
+});
+
+// Cache tags — invalidate a group at once (Redis only)
+Cache::tags(['posts', 'homepage'])->put('featured', $data, 3600);
+Cache::tags('posts')->flush();  // clears all post-tagged items
+
+// Cache forever + explicit forget
+Cache::forever('site_settings', $settings);
+Cache::forget('site_settings');
+
+// Database query caching pattern
+$users = Cache::remember("users_page_{$page}", 300, fn() =>
+    User::active()->paginate(20)
+);
+
+// Query optimization: avoid N+1
+$orders = Order::with(['user', 'items.product'])
+               ->whereDate('created_at', today())
+               ->get();
+
+// Use chunking for large data sets
+User::chunk(200, function ($users) {
+    foreach ($users as $user) {
+        $user->sendWeeklyDigest();
+    }
+});`,
+
+  'Laravel Interview Architectures': `<?php
+// ===== Key architecture questions =====
+
+// Q: How does the request lifecycle work in Laravel?
+// Answer:
+// 1. index.php creates the Application (IoC container)
+// 2. HTTP Kernel loads middleware stack
+// 3. Router matches the URI
+// 4. Middleware runs (global → route-specific)
+// 5. Controller action executes
+// 6. Response passes back through middleware
+// 7. Response sent to browser
+
+// Q: What is the difference between Singleton, Bind, and Instance?
+$app->singleton(Logger::class, fn() => new FileLogger());
+// Same instance returned every call
+
+$app->bind(Logger::class, fn() => new FileLogger());
+// New instance on every resolve
+
+$app->instance(Logger::class, $existingLogger);
+// Bind a pre-built object
+
+// Q: Sanctum vs Passport?
+// Sanctum: SPA/mobile token auth — lightweight, uses cookies or tokens
+// Passport: full OAuth2 server — use when you need third-party OAuth flows
+
+// Q: How to prevent N+1 in Eloquent?
+// Use ->with([]) eager loading
+// Enable strict mode: Model::preventLazyLoading() in AppServiceProvider
+
+// Q: What is a Service Provider vs Service Container?
+// Container: IoC engine that resolves dependencies
+// Provider: tells the container HOW to build things
+
+// Q: How do queues help performance?
+// Offload slow work (emails, PDFs, notifications) to background workers
+// Response time stays fast; jobs run in parallel`,
 };
 
 const REACT_EXAMPLES: Record<string, string> = {
@@ -1708,6 +3032,238 @@ CREATE INDEX idx_orders_user   ON orders(user_id);
 
 -- Re-run EXPLAIN to verify improvement`,
 
+  'Database Design Fundamentals': `-- Identify entities (nouns) and relationships before writing SQL
+
+-- users(id, name, email, created_at)
+-- orders(id, user_id, status, total, created_at)
+-- order_items(id, order_id, product_id, qty, unit_price)
+-- products(id, name, price, stock, category_id)
+-- categories(id, name, parent_id)  -- self-referencing for tree
+
+-- Primary key: uniquely identifies each row
+-- Foreign key: enforces referential integrity
+-- Composite key: multiple columns form a unique identifier
+
+CREATE TABLE order_items (
+    id         BIGINT UNSIGNED AUTO_INCREMENT,
+    order_id   BIGINT UNSIGNED NOT NULL,
+    product_id BIGINT UNSIGNED NOT NULL,
+    qty        SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    unit_price DECIMAL(10,2)  NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (order_id)   REFERENCES orders(id)   ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT,
+    INDEX idx_order_id (order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Good design rules:
+-- Store unit_price on order_items (snapshot) not product.price (changes over time)
+-- Use BIGINT for IDs to handle growth
+-- Use utf8mb4 to support emoji and all Unicode`,
+
+  'Normalization and Denormalization': `-- 1NF: atomic values — no repeating groups
+-- BAD: tags = "php,laravel,mysql"   (not atomic)
+-- GOOD: separate post_tags table
+
+-- 2NF: no partial dependency on composite key
+-- If composite key is (order_id, product_id):
+-- BAD: store product_name in order_items (depends only on product_id)
+-- GOOD: join to products table to get product_name
+
+-- 3NF: no transitive dependency
+-- BAD: users(id, zip_code, city, state) — city depends on zip, not id
+-- GOOD: zip_codes(zip, city, state) referenced from users
+
+-- Normalized design (3NF):
+CREATE TABLE posts (id INT PRIMARY KEY, title VARCHAR(200), user_id INT);
+CREATE TABLE post_tags (post_id INT, tag_id INT, PRIMARY KEY(post_id, tag_id));
+CREATE TABLE tags (id INT PRIMARY KEY, name VARCHAR(50) UNIQUE);
+
+-- Denormalization for performance (trade write overhead for faster reads):
+-- Store cached_comment_count on posts instead of COUNT() every page load
+ALTER TABLE posts ADD COLUMN comment_count INT NOT NULL DEFAULT 0;
+
+-- Increment on INSERT to comments, decrement on DELETE
+-- Risk: can drift — add a periodic reconciliation job`,
+
+  'Filtering and Sorting Data': `-- WHERE conditions
+SELECT * FROM orders
+WHERE status = 'pending'
+  AND total > 100
+  AND created_at >= '2024-01-01';
+
+-- BETWEEN (inclusive on both ends)
+SELECT * FROM products WHERE price BETWEEN 10 AND 50;
+
+-- LIKE pattern matching (% = any, _ = one char)
+SELECT * FROM users WHERE name LIKE 'A%';       -- starts with A
+SELECT * FROM users WHERE email LIKE '%@gmail.com';
+
+-- IN / NOT IN
+SELECT * FROM orders WHERE status IN ('pending', 'processing');
+
+-- NULL handling — always use IS NULL / IS NOT NULL
+SELECT * FROM users WHERE deleted_at IS NULL;
+
+-- ORDER BY multiple columns
+SELECT * FROM products ORDER BY category_id ASC, price DESC;
+
+-- LIMIT with OFFSET (for pagination)
+SELECT * FROM products ORDER BY id LIMIT 20 OFFSET 40;  -- page 3
+
+-- NULL LAST in sort (MySQL default is NULL first on ASC)
+SELECT * FROM users ORDER BY last_login IS NULL, last_login DESC;`,
+
+  'Constraints and Data Integrity': `-- NOT NULL: column must have a value
+-- UNIQUE: no two rows can have the same value (allows one NULL)
+-- PRIMARY KEY: NOT NULL + UNIQUE + clustered index
+-- FOREIGN KEY: referential integrity
+-- CHECK: custom rule (MySQL 8.0.16+)
+-- DEFAULT: fallback value
+
+CREATE TABLE users (
+    id         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name       VARCHAR(100)  NOT NULL,
+    email      VARCHAR(255)  NOT NULL UNIQUE,
+    role       ENUM('admin', 'editor', 'viewer') NOT NULL DEFAULT 'viewer',
+    age        TINYINT UNSIGNED CHECK (age >= 0 AND age <= 150),
+    created_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP     NULL
+);
+
+-- Composite UNIQUE: email must be unique per tenant
+ALTER TABLE users
+    ADD CONSTRAINT uq_tenant_email UNIQUE (tenant_id, email);
+
+-- Foreign key with action
+ALTER TABLE orders
+    ADD CONSTRAINT fk_orders_user
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE RESTRICT   -- prevent deleting user with orders
+    ON UPDATE CASCADE;   -- if user.id changes, propagate
+
+-- Disable FK checks during bulk import, re-enable after:
+-- SET FOREIGN_KEY_CHECKS = 0;
+-- ... bulk insert ...
+-- SET FOREIGN_KEY_CHECKS = 1;`,
+
+  'Isolation Levels and Locking': `-- MySQL default isolation: REPEATABLE READ
+-- Dirty Read  — read uncommitted data from another tx
+-- Non-Repeatable Read — same row returns different value in same tx
+-- Phantom Read — same query returns different rows in same tx
+
+-- READ UNCOMMITTED: fastest, dirty reads allowed
+-- READ COMMITTED:   no dirty reads; used by PostgreSQL by default
+-- REPEATABLE READ:  no dirty/non-repeatable; MySQL default
+-- SERIALIZABLE:     full isolation; slowest
+
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+-- Check current level
+SELECT @@transaction_isolation;
+
+-- Row-level locking
+START TRANSACTION;
+SELECT * FROM accounts WHERE id = 1 FOR UPDATE;   -- exclusive lock
+-- Other transactions block on this row until COMMIT/ROLLBACK
+UPDATE accounts SET balance = balance - 500 WHERE id = 1;
+COMMIT;
+
+-- Shared lock (allow other reads, block writes)
+SELECT * FROM products WHERE id = 5 LOCK IN SHARE MODE;
+
+-- Deadlock example:
+-- Tx1: locks row A, waits for row B
+-- Tx2: locks row B, waits for row A
+-- MySQL detects and rolls back one tx with error 1213
+-- Prevention: always lock rows in the same order across transactions
+
+SHOW ENGINE INNODB STATUS;  -- shows recent deadlock details`,
+
+  'Stored Procedures and Views': `-- View: saved SELECT as a virtual table
+CREATE OR REPLACE VIEW active_users_summary AS
+SELECT u.id, u.name, u.email, COUNT(o.id) AS order_count, SUM(o.total) AS lifetime_value
+FROM   users u
+LEFT  JOIN orders o ON o.user_id = u.id AND o.status = 'completed'
+WHERE  u.deleted_at IS NULL
+GROUP BY u.id, u.name, u.email;
+
+-- Query the view like a table
+SELECT * FROM active_users_summary WHERE lifetime_value > 500;
+
+-- Stored Procedure: reusable parameterized SQL block
+DELIMITER $$
+
+CREATE PROCEDURE transfer_funds(
+    IN from_id  INT,
+    IN to_id    INT,
+    IN amount   DECIMAL(10,2)
+)
+BEGIN
+    DECLARE insufficient CONDITION FOR SQLSTATE '45000';
+
+    START TRANSACTION;
+
+    IF (SELECT balance FROM accounts WHERE id = from_id) < amount THEN
+        SIGNAL insufficient SET MESSAGE_TEXT = 'Insufficient funds';
+    END IF;
+
+    UPDATE accounts SET balance = balance - amount WHERE id = from_id;
+    UPDATE accounts SET balance = balance + amount WHERE id = to_id;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+-- Call: CALL transfer_funds(1, 2, 500.00);`,
+
+  'Window Functions and CTEs': `-- Window functions: aggregate over a partition without collapsing rows
+
+-- ROW_NUMBER: sequential row number per partition
+SELECT
+    id,
+    user_id,
+    total,
+    created_at,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) AS order_rank
+FROM orders;
+-- order_rank = 1 means each user's latest order
+
+-- RANK vs DENSE_RANK
+-- RANK:       1, 1, 3 (gaps after tie)
+-- DENSE_RANK: 1, 1, 2 (no gaps)
+SELECT name, score,
+    RANK()       OVER (ORDER BY score DESC) AS rank_with_gap,
+    DENSE_RANK() OVER (ORDER BY score DESC) AS rank_dense
+FROM leaderboard;
+
+-- LAG / LEAD: access adjacent rows
+SELECT
+    date,
+    revenue,
+    LAG(revenue)  OVER (ORDER BY date) AS prev_revenue,
+    LEAD(revenue) OVER (ORDER BY date) AS next_revenue,
+    revenue - LAG(revenue) OVER (ORDER BY date) AS day_change
+FROM daily_revenue;
+
+-- CTE (Common Table Expression) — named subquery, readable
+WITH high_value_customers AS (
+    SELECT user_id, SUM(total) AS total_spent
+    FROM   orders
+    WHERE  status = 'completed'
+    GROUP BY user_id
+    HAVING total_spent > 1000
+),
+ranked AS (
+    SELECT *, RANK() OVER (ORDER BY total_spent DESC) AS rank
+    FROM high_value_customers
+)
+SELECT u.name, r.total_spent, r.rank
+FROM   ranked r
+JOIN   users  u ON u.id = r.user_id
+WHERE  r.rank <= 10;`,
+
   'Pagination and Large Data Handling': `-- BAD: OFFSET gets slower as page number grows
 SELECT * FROM orders ORDER BY created_at DESC LIMIT 20 OFFSET 10000;
 -- MySQL scans 10020 rows to skip 10000
@@ -1732,6 +3288,190 @@ REPEAT
   SELECT * FROM orders WHERE id > @batch LIMIT 1000;
   SET @batch = @batch + 1000;
 UNTIL @batch >= (SELECT MAX(id) FROM orders) END REPEAT;`,
+
+  'Replication and High Availability': `-- Replication: copy data from primary (source) to replicas (read replicas)
+-- Primary: handles all writes
+-- Replicas: handle reads, can promote to primary on failover
+
+-- Types:
+-- Async replication: replica may lag (default, fast writes)
+-- Semi-sync:        primary waits for at least one replica to acknowledge
+
+-- Check replication status (on replica):
+SHOW REPLICA STATUS\\G
+-- Seconds_Behind_Source: lag in seconds
+-- Replica_IO_Running: YES
+-- Replica_SQL_Running: YES
+
+-- GTID-based replication (Global Transaction ID) — easier failover
+-- gtid_mode = ON
+-- enforce_gtid_consistency = ON
+
+-- Use case: route read queries to replica in app config
+-- Laravel: DB::connection('mysql_read')->select(...)
+
+-- Multi-source replication: one replica pulls from multiple primaries
+
+-- MySQL Group Replication / InnoDB Cluster:
+-- Built-in HA — automatic primary election on failure
+-- Minimum 3 nodes required for quorum
+
+-- Backup before replication: use mysqldump with --source-data=2
+-- Test failover in staging — never discover your failover is broken in prod`,
+
+  'Backup and Recovery': `-- Full logical backup (mysqldump)
+-- mysqldump -u root -p --single-transaction --routines --triggers \\
+--   --all-databases > backup_$(date +%Y%m%d).sql
+
+-- Single table
+-- mysqldump -u root -p mydb users > users_backup.sql
+
+-- Restore
+-- mysql -u root -p mydb < backup.sql
+
+-- Point-In-Time Recovery (PITR) — needs binary log enabled
+-- my.cnf: log_bin = /var/log/mysql/mysql-bin.log
+
+-- List binary logs
+SHOW BINARY LOGS;
+
+-- Restore to specific timestamp:
+-- 1. Restore last full backup
+-- 2. Apply binary logs up to target time:
+-- mysqlbinlog --start-datetime="2024-06-01 00:00:00" \\
+--             --stop-datetime="2024-06-01 14:30:00" \\
+--             /var/log/mysql/mysql-bin.* | mysql -u root -p
+
+-- Physical backup (faster, bigger files)
+-- Use Percona XtraBackup for hot backups (no downtime)
+-- xtrabackup --backup --target-dir=/backup/
+
+-- Best practices:
+-- Test restores regularly (backup is worthless if restore fails)
+-- Store backups off-server (S3, GCS)
+-- Encrypt backups at rest
+-- Keep 7 daily + 4 weekly + 12 monthly`,
+
+  'Security and Access Control': `-- Principle of Least Privilege: grant only what is needed
+
+-- Create application user (never use root in your app)
+CREATE USER 'app_user'@'%' IDENTIFIED BY 'strong-password';
+
+-- Grant only necessary permissions
+GRANT SELECT, INSERT, UPDATE, DELETE ON myapp.* TO 'app_user'@'%';
+-- No GRANT OPTION, no DROP, no CREATE
+
+-- Read-only user for analytics/reporting
+CREATE USER 'analytics'@'%' IDENTIFIED BY 'another-password';
+GRANT SELECT ON myapp.* TO 'analytics'@'%';
+
+-- View current grants
+SHOW GRANTS FOR 'app_user'@'%';
+
+-- Revoke
+REVOKE DELETE ON myapp.* FROM 'app_user'@'%';
+
+-- Encryption at rest: enable InnoDB tablespace encryption
+-- innodb_encrypt_tables = ON
+
+-- TLS in transit: require_secure_transport = ON
+-- ALTER USER 'app_user'@'%' REQUIRE SSL;
+
+-- Audit logging (MySQL Enterprise or MariaDB Audit Plugin)
+-- Logs who did what and when
+
+-- Harden my.cnf:
+-- local-infile = 0          (disable file import by users)
+-- skip-symbolic-links = 1
+-- bind-address = 127.0.0.1  (only local connections)`,
+
+  'MySQL in Application Architecture': `-- Laravel: config/database.php — read/write splitting
+// 'mysql' => [
+//   'read'  => ['host' => ['replica1.db', 'replica2.db']],
+//   'write' => ['host' => 'primary.db'],
+//   'sticky' => true,   // after a write, reads go to primary for this request
+// ]
+
+-- Connection pooling (important for high-traffic apps)
+-- Don't open a new connection per request — use a pool (PgBouncer, ProxySQL)
+-- PHP-FPM: PDO persistent connections  ->  PDO::ATTR_PERSISTENT => true
+
+-- Soft deletes: never hard DELETE in most business apps
+-- ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP NULL;
+-- Always: SELECT * FROM users WHERE deleted_at IS NULL;
+
+-- Timestamps pattern
+-- created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+-- UUID vs Auto-increment IDs
+-- Auto-increment: fast inserts, sequential, predictable
+-- UUID: globally unique, distributed-safe, random → index fragmentation
+-- ULID: sorted UUID alternative — ordered + globally unique
+
+-- Database migrations strategy
+-- Always additive first: add column, deploy code, then drop old column
+-- Never remove a column in the same deploy as the code that stops using it`,
+
+  'Common Performance Bottlenecks': `-- 1. Missing indexes — the most common issue
+EXPLAIN SELECT * FROM orders WHERE user_id = 5 AND status = 'pending';
+-- type: ALL → add index: CREATE INDEX idx ON orders(user_id, status);
+
+-- 2. SELECT * — fetches unneeded columns, breaks covering index
+SELECT id, name FROM users WHERE role = 'admin';  -- not SELECT *
+
+-- 3. N+1 queries — fetch related data in application loop
+-- Fix: JOIN in SQL, or use ORM eager loading (with())
+
+-- 4. Unindexed JOINs
+EXPLAIN SELECT u.name, COUNT(o.id)
+FROM users u LEFT JOIN orders o ON o.user_id = u.id
+GROUP BY u.id;
+-- Ensure orders.user_id is indexed
+
+-- 5. LIKE with leading wildcard — cannot use index
+SELECT * FROM products WHERE name LIKE '%phone%';  -- full scan
+-- Fix: use FULLTEXT index for search
+
+-- 6. Functions on indexed columns — breaks index usage
+SELECT * FROM orders WHERE YEAR(created_at) = 2024;   -- bad
+SELECT * FROM orders WHERE created_at >= '2024-01-01'  -- good
+  AND created_at < '2025-01-01';
+
+-- 7. Large OFFSET pagination (covered in Pagination module)
+-- 8. Locking too many rows (use narrowest WHERE possible)
+-- 9. Missing composite index (column order matters — most selective first)
+-- 10. Slow query log: slow_query_log=1, long_query_time=1`,
+
+  'MySQL Interview Case Studies': `-- ===== Common Interview Questions =====
+
+-- Q: What is the difference between DELETE, TRUNCATE, DROP?
+-- DELETE: DML — removes rows, logs each, can rollback, fires triggers
+-- TRUNCATE: DDL — removes all rows fast, minimal logging, cannot rollback
+-- DROP: DDL — removes the entire table and its data
+
+-- Q: Explain clustered vs non-clustered index in InnoDB
+-- Clustered: the PRIMARY KEY index IS the table data (rows stored in PK order)
+-- Non-clustered: secondary indexes — leaf nodes store PK values, not row data
+--   → Two lookups: secondary index → PK → row (unless covering index)
+
+-- Q: What is a covering index?
+-- An index that contains ALL columns needed by the query
+-- No need to visit the actual table row (faster)
+CREATE INDEX idx_cover ON orders(user_id, status, total);
+SELECT total FROM orders WHERE user_id = 5 AND status = 'pending';
+-- Uses index only — "Using index" in EXPLAIN Extra
+
+-- Q: How to find the second highest salary?
+SELECT MAX(salary) FROM employees WHERE salary < (SELECT MAX(salary) FROM employees);
+-- Or with window functions:
+SELECT salary FROM (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) AS r FROM employees
+) ranked WHERE r = 2 LIMIT 1;
+
+-- Q: What causes a full table scan?
+-- No index on WHERE column, function on indexed column, low cardinality,
+-- type mismatch (string vs int comparison)`,
 };
 
 const MONGODB_EXAMPLES: Record<string, string> = {
@@ -1840,36 +3580,524 @@ db.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 // View existing indexes
 db.orders.getIndexes();`,
 
-  'Schema Design Strategies': `// Two main patterns: Embedding vs Referencing
-
-// EMBEDDING — best for data always read together (1-to-few)
+  'Embedding vs Referencing': `// Embedding: store related data inside the document
 db.users.insertOne({
-  _id:     ObjectId(),
-  name:    "Alice",
-  email:   "alice@example.com",
-  address: {          // embedded — no JOIN needed
-    street: "123 Main St",
-    city:   "Mumbai",
-    zip:    "400001",
-  },
-  socialLinks: {
-    github:   "https://github.com/alice",
-    linkedin: "https://linkedin.com/in/alice",
-  },
+  _id:   ObjectId(),
+  name:  "Alice",
+  email: "alice@example.com",
+  // Embedded — always read together, belongs to this user only
+  address: { street: "123 Main St", city: "Mumbai", zip: "400001" },
+  // Embed small arrays (bounded — won't grow to thousands)
+  skills: ["PHP", "Laravel", "MySQL"],
 });
 
-// REFERENCING — best for large/shared/frequently updated sub-docs (1-to-many)
+// Referencing: store the _id of the related document
 db.posts.insertOne({
   _id:       ObjectId(),
   title:     "Node.js Tips",
-  authorId:  ObjectId("user123"),  // reference to users collection
-  tags:      ["nodejs", "performance"],
+  authorId:  ObjectId("64a1f..."),  // reference to users._id
+  tags:      ["nodejs"],
   createdAt: new Date(),
 });
 
+// Use $lookup (like a JOIN) when you need both documents
+db.posts.aggregate([
+  { $lookup: {
+    from:         "users",
+    localField:   "authorId",
+    foreignField: "_id",
+    as:           "author",
+  }},
+  { $unwind: "$author" },
+  { $project: { title: 1, "author.name": 1 } },
+]);
+
 // Rule of thumb:
-// Embed when sub-data belongs to parent only
-// Reference when sub-data is shared or grows unbounded`,
+// Embed  → data read/written together, belongs to one parent, bounded size
+// Reference → data shared across docs, unbounded growth, queried independently`,
+
+  'Schema Design Strategies': `// Bucket Pattern — group time-series events into buckets
+// Instead of 1 doc per measurement (millions of docs):
+db.metrics.insertOne({
+  sensorId:    "sensor-42",
+  date:        new Date("2024-06-01"),
+  count:       24,
+  measurements: [
+    { hour: 0,  value: 21.5 },
+    { hour: 1,  value: 21.8 },
+    // ... up to 24 entries
+  ],
+});
+// Query: find all measurements for a day — one document fetch
+
+// Polymorphic Pattern — different sub-types in one collection
+db.content.insertMany([
+  { _id: ObjectId(), type: "article", title: "...", body: "...", wordCount: 500 },
+  { _id: ObjectId(), type: "video",   title: "...", url: "...", duration: 300 },
+]);
+db.content.createIndex({ type: 1 });  // query by type efficiently
+
+// Outlier Pattern — handle rare large documents differently
+db.orders.insertOne({
+  _id:         ObjectId(),
+  userId:      ObjectId("..."),
+  items:       [/* most orders: < 20 items */],
+  hasOverflow: false,
+});
+// For rare orders with 1000+ items, set hasOverflow: true
+// and store extra items in an overflow collection
+
+// Anti-patterns to avoid:
+// Unbounded arrays (comments array on a post — use separate collection)
+// Massive documents (>16MB BSON limit)
+// Deeply nested data you need to query on`,
+
+  'Advanced Aggregation Patterns': `// $lookup: LEFT JOIN between collections
+db.orders.aggregate([
+  { $match: { status: "completed" } },
+  {
+    $lookup: {
+      from:         "users",
+      localField:   "userId",
+      foreignField: "_id",
+      as:           "user",
+    },
+  },
+  { $unwind: "$user" },            // flatten the array lookup produces
+  {
+    $project: {
+      orderId:   "$_id",
+      userName:  "$user.name",
+      userEmail: "$user.email",
+      total:     1,
+    },
+  },
+]);
+
+// $unwind: flatten arrays — one doc per array element
+db.orders.aggregate([
+  { $unwind: "$items" },           // one doc per order line item
+  { $group: { _id: "$items.productId", totalSold: { $sum: "$items.qty" } } },
+  { $sort: { totalSold: -1 } },
+  { $limit: 10 },
+]);
+
+// $facet: run multiple pipelines in one pass (multi-faceted search)
+db.products.aggregate([
+  { $match: { category: "electronics" } },
+  {
+    $facet: {
+      byBrand: [{ $group: { _id: "$brand", count: { $sum: 1 } } }],
+      priceRanges: [
+        { $bucket: { groupBy: "$price", boundaries: [0, 100, 500, 1000, 5000],
+                     default: "5000+" } },
+      ],
+      total: [{ $count: "count" }],
+    },
+  },
+]);`,
+
+  'Data Validation and Schema Governance': `// MongoDB 3.6+ supports JSON Schema validation
+db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "email", "role"],
+      properties: {
+        name:  { bsonType: "string", minLength: 1, maxLength: 100 },
+        email: { bsonType: "string", pattern: "^.+@.+\\\\..+$" },
+        role:  { bsonType: "string", enum: ["admin", "editor", "viewer"] },
+        age:   { bsonType: "int", minimum: 0, maximum: 150 },
+      },
+      additionalProperties: false,  // reject unknown fields
+    },
+  },
+  validationAction: "error",   // reject invalid inserts/updates
+  // validationAction: "warn"  — log but allow (useful during migration)
+});
+
+// Add validation to existing collection
+db.runCommand({
+  collMod: "orders",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["userId", "total", "status"],
+      properties: {
+        status: { enum: ["pending", "processing", "completed", "cancelled"] },
+        total:  { bsonType: "double", minimum: 0 },
+      },
+    },
+  },
+});`,
+
+  'Transactions and Consistency': `// Multi-document transactions (MongoDB 4.0+ replica sets, 4.2+ sharded)
+// Use when multiple writes must be atomic
+
+const session = db.getMongo().startSession();
+session.startTransaction({
+  readConcern:  { level: "snapshot" },
+  writeConcern: { w: "majority" },
+});
+
+try {
+  const ordersCol  = session.getDatabase("shop").orders;
+  const productsCol = session.getDatabase("shop").products;
+
+  // Both writes succeed or both are rolled back
+  ordersCol.insertOne({
+    userId: ObjectId("..."),
+    items:  [{ productId: ObjectId("..."), qty: 2 }],
+    total:  199.99,
+    status: "pending",
+  }, { session });
+
+  productsCol.updateOne(
+    { _id: ObjectId("..."), stock: { $gte: 2 } },
+    { $inc: { stock: -2 } },
+    { session }
+  );
+
+  session.commitTransaction();
+} catch (err) {
+  session.abortTransaction();
+  throw err;
+} finally {
+  session.endSession();
+}
+
+// Caution: transactions have performance cost
+// Design schema to minimize cross-collection writes
+// Use atomic update operators ($set, $inc, $push) for single-doc operations`,
+
+  'Replica Sets and High Availability': `// Replica set: group of MongoDB instances with same data
+// Primary: accepts all writes
+// Secondaries: replicate from primary (async), can serve reads
+// Minimum 3 nodes recommended (for election majority)
+
+// Start a 3-node replica set (mongod config):
+// replication:
+//   replSetName: "rs0"
+
+// Initialize:
+// rs.initiate({
+//   _id: "rs0",
+//   members: [
+//     { _id: 0, host: "mongo1:27017", priority: 2 },  // preferred primary
+//     { _id: 1, host: "mongo2:27017" },
+//     { _id: 2, host: "mongo3:27017", arbiterOnly: true },  // votes only
+//   ]
+// })
+
+// Connection string targets all members — driver handles failover
+// mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=rs0
+
+// Read preferences
+// primary         — always read from primary (default, consistent)
+// primaryPreferred — primary if available, else secondary
+// secondary       — always secondary (may be slightly stale)
+// nearest         — lowest latency member
+
+// Check replica set status
+rs.status();
+rs.isMaster();   // which node is primary right now
+
+// Stepdown primary manually (for maintenance):
+// rs.stepDown()`,
+
+  'Sharding and Horizontal Scaling': `// Sharding: distributes data across multiple shards (servers)
+// Use when a single replica set cannot handle your data volume or throughput
+
+// Components:
+// mongos: query router (client connects here)
+// config servers: store cluster metadata (3-node replica set)
+// shards: each shard is itself a replica set
+
+// Enable sharding on a database and collection
+sh.enableSharding("mydb");
+
+// Choose a shard key — most important decision
+// Good shard key: high cardinality, even distribution, query-friendly
+sh.shardCollection("mydb.orders", { userId: "hashed" });
+// Hashed sharding: even distribution, no hotspots, no range queries
+
+sh.shardCollection("mydb.events", { tenantId: 1, createdAt: 1 });
+// Compound: range queries on createdAt per tenant, risk: hotspot on new dates
+
+// Check sharding status
+sh.status();
+db.orders.getShardDistribution();
+
+// Anti-patterns:
+// Low-cardinality key (e.g. status: "active"/"inactive") → only 2 shards
+// Monotonically increasing key (auto-increment) → all writes to one shard
+// Key not in query → scatter-gather (all shards queried)
+
+// Rule: only shard when you need to — adds operational complexity`,
+
+  'Change Streams and Real-time Data': `// Change streams: listen to real-time data changes (MongoDB 3.6+)
+// Requires replica set or sharded cluster
+
+// Watch a collection for all changes
+const changeStream = db.orders.watch();
+
+changeStream.forEach(change => {
+  console.log("Operation:", change.operationType);  // insert, update, delete
+  console.log("Document:",  change.fullDocument);
+  console.log("Key:",       change.documentKey);
+});
+
+// Filter: only watch inserts and updates
+const stream = db.orders.watch([
+  { $match: {
+    operationType: { $in: ["insert", "update"] },
+    "fullDocument.status": "completed",
+  }},
+]);
+
+// Resume after restart (store resumeToken)
+let resumeToken = null;
+
+db.orders.watch([], { resumeAfter: resumeToken }).forEach(change => {
+  resumeToken = change._id;   // save to DB — resume here on restart
+  processChange(change);
+});
+
+// Use cases:
+// Real-time notifications (new order → push notification)
+// Cache invalidation (product updated → clear Redis cache)
+// Audit logging (document changed → write to audit collection)
+// Sync to search index (Elasticsearch, Algolia)`,
+
+  'MongoDB Security': `// 1. Enable authentication (disabled by default in dev)
+// mongod.conf:
+// security:
+//   authorization: enabled
+
+// 2. Create admin user first
+use admin
+db.createUser({
+  user: "admin",
+  pwd:  passwordPrompt(),
+  roles: [{ role: "userAdminAnyDatabase", db: "admin" }]
+});
+
+// 3. Create application user with minimum permissions
+use myapp
+db.createUser({
+  user: "app_user",
+  pwd:  passwordPrompt(),
+  roles: [{ role: "readWrite", db: "myapp" }]
+});
+
+// 4. Field-level redaction in aggregation
+db.users.aggregate([
+  { $project: {
+    name:     1,
+    email:    1,
+    password: 0,     // never return password hash to API
+    ssn:      0,
+  }},
+]);
+
+// 5. TLS in transit
+// mongod.conf:
+// net:
+//   tls:
+//     mode: requireTLS
+//     certificateKeyFile: /etc/ssl/mongo.pem
+//     CAFile: /etc/ssl/ca.pem
+
+// 6. Network isolation — bind to app server IPs only
+// net:
+//   bindIp: 127.0.0.1,10.0.1.5
+
+// 7. Audit logging (MongoDB Enterprise)
+// Logs authentication, authorization, CRUD operations`,
+
+  'Performance Tuning': `// 1. Always check explain output before deploying queries
+db.orders.find({ userId: ObjectId("..."), status: "pending" })
+         .explain("executionStats");
+// Look for: IXSCAN (good) vs COLLSCAN (bad)
+// Check: totalDocsExamined vs nReturned — ratio should be close to 1
+
+// 2. Create compound index matching query + sort
+db.orders.createIndex({ userId: 1, status: 1, createdAt: -1 });
+// Supports: find({userId, status}), find({userId}), sort by createdAt
+
+// 3. Projection — only fetch needed fields
+db.products.find({ category: "electronics" }, { name: 1, price: 1, _id: 0 });
+
+// 4. Aggregation: put $match and $limit early to reduce pipeline work
+db.orders.aggregate([
+  { $match: { status: "completed" } },   // filter first
+  { $sort:  { createdAt: -1 } },
+  { $limit: 100 },                        // limit early
+  { $lookup: { from: "users", ... } },   // then join
+]);
+
+// 5. Use covered queries — index contains all projected fields
+db.users.createIndex({ email: 1, name: 1, role: 1 });
+db.users.find({ email: "alice@example.com" }, { name: 1, role: 1, _id: 0 });
+// "indexOnly": true in explain — never touches the collection
+
+// 6. currentOp: find slow running operations
+db.currentOp({ secs_running: { $gt: 5 } });
+// db.killOp(opid)  — terminate if needed`,
+
+  'MongoDB in Microservices': `// Database-per-service pattern: each service owns its data
+// Service A: MongoDB (flexible documents for content)
+// Service B: PostgreSQL (strict schema for billing)
+// Service C: Redis (session/cache)
+
+// Event-driven sync between services using change streams
+// Order service writes order → emits event via change stream
+// Inventory service listens → decrements stock
+// Notification service listens → sends confirmation email
+
+// Avoid distributed transactions across services
+// Use Saga pattern instead:
+// 1. Order service creates order (status: "pending")
+// 2. Inventory service reserves stock → emits "reserved" event
+// 3. Payment service charges → emits "paid" event
+// 4. Order service marks "completed"
+// If any step fails → compensating transactions rollback previous steps
+
+// Shared data anti-pattern — each service has its own copy
+// Sync via events, accept eventual consistency
+db.orders.createIndex({ externalRef: 1 }, { unique: true });
+// externalRef: ID from another service — for idempotent upserts
+db.orders.updateOne(
+  { externalRef: "payment-123" },
+  { $set: { status: "paid", paidAt: new Date() } },
+  { upsert: true }
+);`,
+
+  'Backup and Disaster Recovery': `// Logical backup: mongodump
+// mongodump --uri="mongodb://user:pass@host:27017/mydb" \\
+//           --gzip \\
+//           --archive=backup_$(date +%Y%m%d).gz
+
+// Restore
+// mongorestore --uri="mongodb://..." \\
+//              --gzip \\
+//              --archive=backup_20240601.gz \\
+//              --drop   // drop existing collections first
+
+// Point-in-time restore from oplog
+// mongodump --oplog  // includes oplog in backup
+// mongorestore --oplogReplay --oplogLimit="1717200000:1"  // replay to timestamp
+
+// Atlas: continuous backup with point-in-time restore (cloud)
+// On-prem: use mongodump + cron or Percona Backup for MongoDB (PBM)
+
+// Backup strategy:
+// Hourly: oplog tailing (near-zero RPO)
+// Daily:  full mongodump or PBM snapshot
+// Weekly: full backup stored off-site (S3 Glacier)
+
+// Test your restore:
+// Restore to a test server monthly — never assume backups work
+// Measure RTO (time to restore) — know this before an incident
+
+// RPO (Recovery Point Objective): how much data loss is acceptable?
+// RTO (Recovery Time Objective): how fast must service be restored?`,
+
+  'MongoDB vs MySQL': `// Choose based on data shape, query patterns, and consistency needs
+
+// MongoDB strengths:
+// Flexible schema — schema evolves without migrations
+// Hierarchical data — embed related data, avoid JOINs
+// Horizontal scaling — sharding built-in
+// Developer speed — JSON-native, no ORM mismatch
+// Best for: content management, catalogs, user profiles, IoT, event logs
+
+// MySQL strengths:
+// ACID transactions across multiple tables — rock solid
+// Complex JOINs and ad-hoc queries
+// Strict schema — enforces data integrity
+// Mature tooling, reporting, BI tools
+// Best for: billing, financials, inventory, anything with strict consistency
+
+// When to use both together:
+// MySQL: orders, payments (transactional data)
+// MongoDB: product catalog, user activity, content (flexible data)
+
+// Common mistake: choosing MongoDB to "avoid schema design"
+// MongoDB requires MORE thought on schema, not less
+// The difference: you pay for schema upfront (MySQL) vs at query time (MongoDB)
+
+// Interview answer template:
+// "I would use MongoDB for [flexible/hierarchical/high-volume] data where
+//  the schema evolves frequently and horizontal scaling is needed.
+//  I would use MySQL when strong relational integrity, complex JOINs,
+//  or multi-table ACID transactions are required."`,
+
+  'Common Production Mistakes': `// 1. No indexes on query fields — COLLSCAN on large collections
+//    Fix: analyze slow queries with db.currentOp(), add indexes
+
+// 2. Unbounded arrays in documents
+//    Bad: { post: "...", comments: [ {c1}, {c2}, ... {c10000} ] }
+//    Fix: separate comments collection, reference post._id
+
+// 3. Using _id as a UUID string instead of ObjectId
+//    ObjectId is indexed, sorted, contains timestamp — use it
+
+// 4. Schema version 0: no schema validation in prod
+//    Fix: db.runCommand({ collMod: "users", validator: {...} })
+
+// 5. Not setting maxTimeMS on queries — runaway queries
+db.orders.find({ status: "pending" }).maxTimeMS(5000);
+
+// 6. Missing write concern for critical writes
+db.payments.insertOne({ amount: 500 }, { writeConcern: { w: "majority" } });
+
+// 7. Transactions everywhere — massive performance cost
+//    Fix: design schema to avoid cross-document transactions
+
+// 8. Not monitoring oplog window — replication lag fills oplog
+//    Fix: set oplogSizeMB = 10240 (10GB) for busy systems
+
+// 9. Hardcoded connection string — one host, no replica set members
+//    Fix: include all replica set members in connection string
+
+// 10. No TTL index on session/log collections — disk fills up
+db.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });`,
+
+  'MongoDB Interview Scenarios': `// ===== Most Common MongoDB Interview Questions =====
+
+// Q: What is the aggregation pipeline?
+// Series of stages that transform documents. Each stage output → next stage input.
+// Common stages: $match, $group, $sort, $limit, $lookup, $unwind, $project, $facet
+
+// Q: When would you embed vs reference?
+// Embed: data always accessed together, 1-to-1 or 1-to-few, bounded arrays
+// Reference: data shared across docs, 1-to-many (unbounded), queried independently
+
+// Q: How do you avoid N+1 in MongoDB?
+// Use $lookup in aggregation (one query with join)
+// Batch-load references using $in: db.users.find({ _id: { $in: authorIds } })
+
+// Q: What is the difference between $match before vs after $group?
+// $match BEFORE $group: filters docs first (uses index, faster)
+// $match AFTER $group: filters on computed aggregation fields (no index)
+
+// Q: How would you model a many-to-many relationship?
+// Option 1: embed arrays of IDs on both sides (small sets)
+// Option 2: junction collection (for large sets or pivot data)
+db.userRoles.insertOne({ userId: ObjectId("..."), roleId: ObjectId("..."), grantedAt: new Date() });
+
+// Q: How does MongoDB handle consistency?
+// Single-document writes: always atomic
+// Multi-document: use transactions (4.0+)
+// Replica reads: may be stale — use readConcern: "majority" for strong consistency
+
+// Q: What is an upsert?
+db.users.updateOne(
+  { email: "alice@example.com" },
+  { $set: { name: "Alice", updatedAt: new Date() } },
+  { upsert: true }   // insert if not found, update if found
+);`,
 };
 
 const DEVOPS_EXAMPLES: Record<string, string> = {
@@ -4329,10 +6557,12 @@ const createLevelContent = (
 });
 
 const buildTopic = (meta: TopicMeta): Topic => {
-  const modules = TOPIC_MODULES[meta.id] ?? [];
-  const levels = LEVEL_CONFIGS.map((cfg) =>
-    createLevelContent(meta.name, meta.id, modules, cfg),
-  );
+  const allModules = TOPIC_MODULES[meta.id] ?? [];
+  const levelModules = TOPIC_LEVEL_MODULES[meta.id];
+  const levels = LEVEL_CONFIGS.map((cfg) => {
+    const modules = levelModules ? (levelModules[cfg.level] ?? allModules) : allModules;
+    return createLevelContent(meta.name, meta.id, modules, cfg);
+  });
 
   return {
     id: meta.id,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ContentSection } from '@/types';
 import { clsx } from 'clsx';
+import { Highlight, slugify } from '@/lib/highlight';
 
 function CodeBlock({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
@@ -69,13 +70,23 @@ function CodeBlock({ code }: { code: string }) {
 interface ContentCardProps {
   section: ContentSection;
   index: number;
+  highlightQuery?: string;
+  highlightTitle?: string;
 }
 
-export function ContentCard({ section, index }: ContentCardProps) {
+export function ContentCard({ section, index, highlightQuery = '', highlightTitle = '' }: ContentCardProps) {
   const [codeOpen, setCodeOpen] = useState(false);
+  const isHighlighted = highlightTitle && section.title === highlightTitle;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden animate-slide-up"
+    <div
+      id={`section-${slugify(section.title)}`}
+      className={clsx(
+        'bg-white dark:bg-gray-900 rounded-2xl border overflow-hidden animate-slide-up transition-shadow duration-500',
+        isHighlighted
+          ? 'border-yellow-400 dark:border-yellow-500 ring-2 ring-yellow-300 dark:ring-yellow-600/60 shadow-lg'
+          : 'border-gray-200 dark:border-gray-800',
+      )}
       style={{ animationDelay: `${index * 60}ms` }}
     >
       {/* Card header */}
@@ -85,7 +96,7 @@ export function ContentCard({ section, index }: ContentCardProps) {
             {index + 1}
           </div>
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug">
-            {section.title}
+            <Highlight text={section.title} query={highlightQuery} />
           </h3>
         </div>
       </div>
@@ -93,7 +104,7 @@ export function ContentCard({ section, index }: ContentCardProps) {
       <div className="px-5 py-4 space-y-4">
         {/* Explanation */}
         <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-          {section.explanation}
+          <Highlight text={section.explanation} query={highlightQuery} />
         </p>
 
         {/* Real-world example */}

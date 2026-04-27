@@ -1,13 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InterviewQA as IQA } from '@/types';
 import { clsx } from 'clsx';
+import { Highlight, slugify } from '@/lib/highlight';
 
 interface InterviewQAProps {
   questions: IQA[];
+  highlightQuery?: string;
+  highlightTitle?: string;
 }
 
-export function InterviewQA({ questions }: InterviewQAProps) {
+export function InterviewQA({ questions, highlightQuery = '', highlightTitle = '' }: InterviewQAProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  // Auto-open the question that matches the search result
+  useEffect(() => {
+    if (!highlightTitle) return;
+    const idx = questions.findIndex((qa) => qa.question === highlightTitle);
+    if (idx !== -1) setOpenIndex(idx);
+  }, [highlightTitle, questions]);
 
   if (questions.length === 0) return null;
 
@@ -22,10 +32,18 @@ export function InterviewQA({ questions }: InterviewQAProps) {
       </div>
 
       <div className="space-y-2">
-        {questions.map((qa, i) => (
+        {questions.map((qa, i) => {
+          const isHighlighted = highlightTitle && qa.question === highlightTitle;
+          return (
           <div
             key={i}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden"
+            id={`qa-${slugify(qa.question)}`}
+            className={clsx(
+              'bg-white dark:bg-gray-900 border rounded-xl overflow-hidden transition-shadow duration-500',
+              isHighlighted
+                ? 'border-yellow-400 dark:border-yellow-500 ring-2 ring-yellow-300 dark:ring-yellow-600/60 shadow-lg'
+                : 'border-gray-200 dark:border-gray-800',
+            )}
           >
             <button
               onClick={() => setOpenIndex(openIndex === i ? null : i)}
@@ -35,7 +53,7 @@ export function InterviewQA({ questions }: InterviewQAProps) {
                 Q
               </span>
               <p className="flex-1 font-medium text-sm text-gray-800 dark:text-gray-200 leading-snug">
-                {qa.question}
+                <Highlight text={qa.question} query={highlightQuery} />
               </p>
               <span className={clsx(
                 'text-gray-400 text-xs flex-shrink-0 mt-1 transition-transform duration-200',
@@ -80,7 +98,8 @@ export function InterviewQA({ questions }: InterviewQAProps) {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

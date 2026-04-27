@@ -4,6 +4,7 @@ import { phpInterview } from './php';
 import { reactInterview } from './react';
 import { nodejsInterview } from './nodejs';
 import { mysqlInterview } from './mysql';
+import { vuejsInterview } from './vuejs';
 import {
   agileInterview,
   devopsInterview,
@@ -19,6 +20,7 @@ export const INTERVIEW_DATA: InterviewData = {
   nodejs: nodejsInterview,
   mysql: mysqlInterview,
   mongodb: mongodbInterview,
+  vuejs: vuejsInterview,
   devops: devopsInterview,
   github: githubInterview,
   agile: agileInterview,

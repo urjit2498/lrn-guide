@@ -11,18 +11,32 @@ interface AppActions {
   markLevelComplete: (topicId: string, level: Level) => void;
   isLevelComplete: (topicId: string, level: Level) => boolean;
   loadProgress: (rows: Array<{ topic: string; subtopic: string; completed: boolean }>) => void;
+  openSearch: () => void;
+  closeSearch: () => void;
+  setHighlight: (query: string, title: string) => void;
+  clearHighlight: () => void;
 }
 
-const initialState: AppState = {
+// Non-persisted transient state (lives only for the session)
+interface TransientState {
+  isSearchOpen: boolean;
+  highlightQuery: string;
+  highlightTitle: string;
+}
+
+const initialState: AppState & TransientState = {
   selectedTopicId: 'php',
   selectedLevel: 'beginner',
   searchQuery: '',
   isDarkMode: false,
   bookmarks: [],
   progress: {},
+  isSearchOpen: false,
+  highlightQuery: '',
+  highlightTitle: '',
 };
 
-export const useAppStore = create<AppState & AppActions>()(
+export const useAppStore = create<AppState & TransientState & AppActions>()(
   persist(
     (set, get) => ({
       ...initialState,
@@ -60,6 +74,12 @@ export const useAppStore = create<AppState & AppActions>()(
 
       isLevelComplete: (topicId, level) =>
         get().progress[topicId]?.[level] ?? false,
+
+      openSearch: () => set({ isSearchOpen: true }),
+      closeSearch: () => set({ isSearchOpen: false }),
+
+      setHighlight: (query, title) => set({ highlightQuery: query, highlightTitle: title }),
+      clearHighlight: () => set({ highlightQuery: '', highlightTitle: '' }),
 
       loadProgress: (rows) => {
         const VALID_LEVELS = new Set<Level>(['beginner', 'intermediate', 'advanced']);

@@ -26,11 +26,35 @@ const EXPERIENCE_LEVELS = [
 ];
 
 const TECH_OPTIONS = [
-  'JavaScript', 'TypeScript', 'React', 'Next.js', 'Vue', 'Angular',
-  'Node.js', 'PHP', 'Laravel', 'Python', 'Django', 'Java', 'Spring Boot', 'Go',
-  'MySQL', 'PostgreSQL', 'MongoDB', 'Redis',
-  'Docker', 'Kubernetes', 'AWS', 'GCP', 'Azure', 'Git', 'CI/CD',
-  'HTML/CSS', 'Tailwind CSS', 'GraphQL', 'REST APIs',
+  'JavaScript',
+  'TypeScript',
+  'React',
+  'Next.js',
+  'Vue',
+  'Angular',
+  'Node.js',
+  'PHP',
+  'Laravel',
+  'Python',
+  'Django',
+  'Java',
+  'Spring Boot',
+  'Go',
+  'MySQL',
+  'PostgreSQL',
+  'MongoDB',
+  'Redis',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'GCP',
+  'Azure',
+  'Git',
+  'CI/CD',
+  'HTML/CSS',
+  'Tailwind CSS',
+  'GraphQL',
+  'REST APIs',
 ];
 
 const EMPTY_PROFILE: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> = {
@@ -87,7 +111,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : '';
         if (msg.includes('schema cache') || msg.includes('profiles')) {
-          toast.error('Profiles table missing. Run the setup SQL in your Supabase dashboard first.');
+          toast.error(
+            'Profiles table missing. Run the setup SQL in your Supabase dashboard first.',
+          );
         } else {
           toast.error('Failed to load profile.');
         }
@@ -142,7 +168,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Save failed.';
       if (msg.includes('schema cache') || msg.includes('profiles')) {
-        toast.error('Profiles table missing. Run the setup SQL in your Supabase dashboard first.');
+        toast.error(
+          'Profiles table missing. Run the setup SQL in your Supabase dashboard first.',
+        );
       } else {
         toast.error(msg);
       }
@@ -174,14 +202,22 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
   }
 
   const initials = form.full_name
-    ? form.full_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    ? form.full_name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
     : user.email.slice(0, 2).toUpperCase();
 
   return (
     <div className="relative" ref={panelRef}>
       {/* Avatar trigger */}
       <button
-        onClick={() => { setOpen((v) => !v); setConfirmDelete(false); }}
+        onClick={() => {
+          setOpen((v) => !v);
+          setConfirmDelete(false);
+        }}
         className="w-9 h-9 rounded-full bg-indigo-600 text-white text-sm font-semibold flex items-center justify-center hover:bg-indigo-700 transition-colors ring-2 ring-white dark:ring-gray-900 focus:outline-none focus:ring-indigo-400"
         title={user.email}
         aria-label="Open profile"
@@ -201,7 +237,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
               <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                 {form.full_name || 'Your Profile'}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {user.email}
+              </p>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -241,8 +279,10 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="Full Name">
                   <input
                     value={form.full_name}
-                    onChange={(e) => setForm((prev) => ({ ...prev, full_name: e.target.value }))}
-                    placeholder="e.g. Urjit Patel"
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, full_name: e.target.value }))
+                    }
+                    placeholder="Enter your full name here..."
                     maxLength={100}
                     className={inputCls}
                   />
@@ -252,11 +292,15 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="Role">
                   <select
                     value={form.role}
-                    onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, role: e.target.value }))
+                    }
                     className={inputCls}
                   >
                     <option value="">Select your role…</option>
-                    {ROLES.map((r) => <option key={r}>{r}</option>)}
+                    {ROLES.map((r) => (
+                      <option key={r}>{r}</option>
+                    ))}
                   </select>
                 </Field>
 
@@ -267,7 +311,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                       <button
                         key={lvl}
                         type="button"
-                        onClick={() => setForm((prev) => ({ ...prev, experience_level: lvl }))}
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, experience_level: lvl }))
+                        }
                         className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                           form.experience_level === lvl
                             ? 'bg-indigo-600 border-indigo-600 text-white'
@@ -287,7 +333,13 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                     min={0}
                     max={50}
                     value={form.years_of_experience ?? ''}
-                    onChange={(e) => setForm((prev) => ({ ...prev, years_of_experience: e.target.value === '' ? null : Number(e.target.value) }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        years_of_experience:
+                          e.target.value === '' ? null : Number(e.target.value),
+                      }))
+                    }
                     placeholder="e.g. 3"
                     className={inputCls}
                   />
@@ -318,7 +370,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                   <textarea
                     rows={2}
                     value={form.learning_goals}
-                    onChange={(e) => setForm((prev) => ({ ...prev, learning_goals: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, learning_goals: e.target.value }))
+                    }
                     placeholder="What are you aiming to learn or improve?"
                     maxLength={500}
                     className={`${inputCls} resize-none`}
@@ -329,7 +383,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="GitHub URL">
                   <input
                     value={form.github_url}
-                    onChange={(e) => setForm((prev) => ({ ...prev, github_url: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, github_url: e.target.value }))
+                    }
                     placeholder="https://github.com/username"
                     maxLength={200}
                     className={inputCls}
@@ -340,7 +396,9 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <Field label="LinkedIn URL">
                   <input
                     value={form.linkedin_url}
-                    onChange={(e) => setForm((prev) => ({ ...prev, linkedin_url: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, linkedin_url: e.target.value }))
+                    }
                     placeholder="https://linkedin.com/in/username"
                     maxLength={200}
                     className={inputCls}
@@ -359,8 +417,12 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
               /* Account tab */
               <div className="flex flex-col gap-3">
                 <div className="rounded-lg bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm">
-                  <p className="text-gray-500 dark:text-gray-400 text-xs mb-0.5">Signed in as</p>
-                  <p className="font-medium text-gray-900 dark:text-white break-all">{user.email}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs mb-0.5">
+                    Signed in as
+                  </p>
+                  <p className="font-medium text-gray-900 dark:text-white break-all">
+                    {user.email}
+                  </p>
                 </div>
 
                 <button
@@ -373,7 +435,8 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                 <hr className="border-gray-200 dark:border-gray-700 my-1" />
 
                 <p className="text-xs text-gray-400 dark:text-gray-500">
-                  Deleting your account is permanent. All your data will be erased and cannot be recovered.
+                  Deleting your account is permanent. All your data will be erased and
+                  cannot be recovered.
                 </p>
 
                 {!confirmDelete ? (

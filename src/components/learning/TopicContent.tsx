@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store/appStore';
 import { loadTopicContent } from '@/data/topics';
 import { LevelTabs } from './LevelTabs';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { getInterviewQuestions } from '@/data/interview';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { saveProgress } from '@/lib/progress';
+import { slugify } from '@/lib/highlight';
 import { toast } from 'sonner';
 import type { Topic } from '@/types';
 
@@ -18,6 +19,9 @@ export function TopicContent() {
     selectedLevel,
     markLevelComplete,
     isLevelComplete,
+    highlightQuery,
+    highlightTitle,
+    clearHighlight,
   } = useAppStore();
   const { user } = useAuthContext();
   const [saving, setSaving] = useState(false);
@@ -36,6 +40,24 @@ export function TopicContent() {
     });
     return () => { cancelled = true; };
   }, [selectedTopicId]);
+
+  // Scroll to the search-matched element and clear highlight after a delay
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!highlightTitle || contentLoading) return;
+
+    const scrollTimer = setTimeout(() => {
+      const sectionEl = document.getElementById(`section-${slugify(highlightTitle)}`);
+      const qaEl = document.getElementById(`qa-${slugify(highlightTitle)}`);
+      const target = sectionEl ?? qaEl;
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    clearTimerRef.current = setTimeout(() => clearHighlight(), 4000);
+
+    return () => clearTimeout(scrollTimer);
+  }, [highlightTitle, contentLoading, clearHighlight]);
 
   async function handleMarkComplete() {
     setSaving(true);
@@ -94,11 +116,17 @@ export function TopicContent() {
             key={`${selectedTopicId}-${selectedLevel}-${i}`}
             section={section}
             index={i}
+            highlightQuery={highlightQuery}
+            highlightTitle={highlightTitle}
           />
         ))}
       </div>
 
-      <InterviewQA questions={questionsForLevel} />
+      <InterviewQA
+        questions={questionsForLevel}
+        highlightQuery={highlightQuery}
+        highlightTitle={highlightTitle}
+      />
 
       <div className="pt-2 pb-4">
         {!completed ? (

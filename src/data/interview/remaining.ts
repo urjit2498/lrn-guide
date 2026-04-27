@@ -426,80 +426,59 @@ export const laravelInterview: InterviewTopic = {
     },
     {
       question: "What is Artisan in Laravel and why is it important?",
-      answer: "Artisan is Laravel's command-line tool. It helps you create files, run migrations, clear cache, run queues, and automate common tasks quickly.",
-      example: "php artisan make:controller OrderController\nphp artisan migrate\nphp artisan queue:work",
-      use_case: "You can scaffold a feature in minutes instead of creating every file manually.",
-      follow_up: "What is the difference between php artisan serve and using Nginx/Apache?"
+      answer: "Artisan is Laravel's built-in CLI tool. It generates boilerplate files, runs database migrations, clears/rebuilds caches, processes queues, and can run custom commands. Without it, you'd create every controller, model, migration, and job file by hand. Custom Artisan commands (php artisan make:command) let you automate recurring tasks (sending reminders, importing data) triggered by cron or manually.",
+      example: "# Generate files instantly:\nphp artisan make:controller ProductController --resource  # CRUD controller\nphp artisan make:model Product -mf     # model + migration + factory at once\nphp artisan make:request StoreProductRequest  # form request with validation\nphp artisan make:job ProcessPayment           # queue job\nphp artisan make:event OrderPlaced            # event class\n\n# Database:\nphp artisan migrate                   # run pending migrations\nphp artisan migrate:rollback          # undo last batch\nphp artisan db:seed                   # run seeders\n\n# Cache management:\nphp artisan optimize                  # cache config, routes, views\nphp artisan optimize:clear            # clear all caches\n\n# Development:\nphp artisan tinker                    # interactive REPL to test Eloquent\nphp artisan route:list                # see all registered routes",
+      use_case: "A developer scaffolds a complete CRUD feature (model, migration, factory, controller, form request) in one command. php artisan tinker lets you test $user = User::find(1); $user->orders->count() directly without writing a route.",
+      follow_up: "How do you create a custom Artisan command? What is the handle() method and how do you schedule a custom command to run automatically?"
     },
     {
-      question: "What is a Laravel controller?",
-      answer: "A controller is a class that receives request data, runs business logic, and returns response (view or JSON).",
-      example: "class ProductController extends Controller {\n  public function index() { return Product::all(); }\n}",
-      use_case: "Keeps route files clean and groups related logic in one place.",
-      follow_up: "Single action controller vs resource controller?"
+      question: "What is a Laravel controller and how do resource controllers work?",
+      answer: "A controller groups related HTTP request handling logic into a class. A resource controller implements the standard CRUD actions: index (list), create (show create form), store (save new), show (view one), edit (show edit form), update (save changes), destroy (delete). Route::resource() maps all 7 RESTful routes to these methods automatically. Route::apiResource() skips create and edit (no HTML forms needed for APIs).",
+      example: "// Create:\nphp artisan make:controller ProductController --resource\n\n// routes/api.php — registers 7 routes with one line:\nRoute::apiResource('products', ProductController::class);\n// GET    /products              → index\n// POST   /products              → store\n// GET    /products/{product}    → show\n// PUT    /products/{product}    → update\n// DELETE /products/{product}    → destroy\n\n// app/Http/Controllers/ProductController.php\nclass ProductController extends Controller {\n    public function index(): JsonResponse {\n        return response()->json(Product::with('category')->paginate(15));\n    }\n    public function store(StoreProductRequest $request): JsonResponse {\n        $product = Product::create($request->validated());\n        return response()->json($product, 201);\n    }\n    public function update(UpdateProductRequest $request, Product $product): JsonResponse {\n        $product->update($request->validated());\n        return response()->json($product);\n    }\n    public function destroy(Product $product): Response {\n        $product->delete();\n        return response()->noContent();\n    }\n}",
+      use_case: "A REST API for a product catalog: one resource controller + one route line handles all 5 API endpoints with consistent naming. Route model binding auto-fetches the Product from the URL — no manual find() needed.",
+      follow_up: "What is route model binding (implicit and explicit)? How does Laravel automatically inject the $product model from the URL parameter?"
     },
     {
-      question: "What is a resource controller in Laravel?",
-      answer: "A resource controller gives standard CRUD methods like index, store, show, update, destroy.",
-      example: "Route::resource('products', ProductController::class);",
-      use_case: "Quickly build admin CRUD panels with consistent route names.",
-      follow_up: "When should you use apiResource instead of resource?"
+      question: "What is mass assignment and how does Laravel protect against it?",
+      answer: "Mass assignment is passing an array of data directly to create() or update() to set multiple model fields at once. The vulnerability: if a user submits extra fields like is_admin=1 or role=admin in a form, they could escalate their own privileges. Laravel protects via $fillable (whitelist — only these fields can be mass-assigned) or $guarded (blacklist — all fields except these). Never use $guarded = [] in production — it allows setting any field.",
+      example: "// VULNERABLE — no protection:\nUser::create($request->all());\n// Attacker sends: name=Alice&email=a@b.com&is_admin=1 → becomes admin!\n\n// PROTECTED with $fillable:\nclass User extends Model {\n    protected $fillable = ['name', 'email', 'password']; // whitelist\n    // is_admin is NOT in fillable — cannot be mass-assigned\n}\nUser::create($request->only(['name', 'email', 'password'])); // safe\n// OR:\nUser::create($request->validated()); // FormRequest validates and filters\n\n// Alternative: $guarded (blacklist)\nclass Product extends Model {\n    protected $guarded = ['id', 'created_at', 'updated_at'];\n    // Everything except listed fields can be mass-assigned\n}\n\n// Manual assignment for sensitive fields:\n$user = User::create($request->validated());\nif ($request->user()->isAdmin()) {\n    $user->update(['role' => $request->role]); // explicit, controlled\n}",
+      use_case: "Registration form: $fillable ensures only name, email, password can be set via registration. The is_admin field is never fillable — only set internally through admin-only flows.",
+      follow_up: "What is the difference between $fillable and $guarded? Is it safer to use $fillable or $guarded = []? Why?"
     },
     {
-      question: "What is mass assignment in Laravel?",
-      answer: "Mass assignment means creating/updating model fields in one call. You must protect fields using fillable or guarded.",
-      example: "protected $fillable = ['name', 'price'];\nProduct::create($request->all());",
-      use_case: "Prevents users from updating sensitive fields like is_admin.",
-      follow_up: "What bug can happen if fillable is not set?"
+      question: "How does CSRF protection work in Laravel?",
+      answer: "CSRF (Cross-Site Request Forgery) is an attack where a malicious website tricks a logged-in user's browser into making a request to your site. Laravel prevents this by generating a unique CSRF token per user session. Any state-changing form submission (POST/PUT/DELETE) must include this token. Laravel's VerifyCsrfToken middleware rejects requests without a valid token. The @csrf Blade directive adds a hidden input field automatically.",
+      example: "<!-- Blade form — @csrf adds a hidden token field -->\n<form method=\"POST\" action=\"/profile\">\n    @csrf\n    <input type=\"text\" name=\"name\" />\n    <button type=\"submit\">Save</button>\n</form>\n<!-- Renders as: <input type=\"hidden\" name=\"_token\" value=\"abc123...\" /> -->\n\n// Ajax requests — include token in header:\naxios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name=\"csrf-token\"]').content;\n// Or:\naxios.post('/profile', data, { headers: { 'X-CSRF-TOKEN': csrfToken } });\n\n// API routes (routes/api.php) are EXCLUDED from CSRF protection\n// because APIs use token auth (Bearer tokens), not session cookies\n// CSRF only matters for cookie/session-based auth\n\n// Exclude specific routes from CSRF:\nprotected $except = ['/webhook/stripe']; // external webhooks can't send CSRF",
+      use_case: "Without CSRF, an attacker could create a page that auto-submits a form to your.bank.com/transfer?to=attacker&amount=10000 — and the user's session cookie authenticates it. CSRF tokens prevent this because the attacker's page cannot read the victim's CSRF token.",
+      follow_up: "Why are API routes excluded from CSRF protection? What makes Bearer token authentication inherently CSRF-safe?"
     },
     {
-      question: "What is CSRF protection in Laravel?",
-      answer: "CSRF protection blocks fake form submissions from other websites. Laravel adds and verifies CSRF token automatically for web forms.",
-      example: "<form method=\"POST\">@csrf ...</form>",
-      use_case: "Protects profile update and password change forms from malicious requests.",
-      follow_up: "Why is CSRF usually not required for stateless token APIs?"
+      question: "How does Laravel validation work and what is the difference between inline validation and FormRequest?",
+      answer: "Validation ensures data is correct before processing. Inline ($request->validate()) is fine for simple cases. FormRequest is a dedicated class for complex validation — it keeps controllers thin, allows authorization checks in the same class, allows custom messages, and is reusable. Both stop execution on failure and return errors automatically (JSON for API, redirect with errors for web).",
+      example: "// Inline validation — simple cases:\npublic function store(Request $request) {\n    $validated = $request->validate([\n        'email' => 'required|email|unique:users',\n        'password' => 'required|min:8|confirmed',\n        'age' => 'nullable|integer|min:18|max:120',\n    ]);\n    User::create($validated);\n}\n\n// FormRequest — complex cases:\nphp artisan make:request StoreOrderRequest\n\nclass StoreOrderRequest extends FormRequest {\n    // Authorization check (runs before validation):\n    public function authorize(): bool {\n        return $this->user()->can('create', Order::class);\n    }\n    \n    public function rules(): array {\n        return [\n            'product_id'  => 'required|exists:products,id',\n            'quantity'    => 'required|integer|min:1|max:100',\n            'coupon_code' => 'nullable|string|exists:coupons,code',\n        ];\n    }\n    \n    public function messages(): array {\n        return [\n            'product_id.exists' => 'The selected product no longer exists.'\n        ];\n    }\n}\n\n// Controller stays clean:\npublic function store(StoreOrderRequest $request) {\n    Order::create($request->validated()); // already validated + authorized\n}",
+      use_case: "A checkout API: StoreOrderRequest validates product exists, quantity is reasonable, and coupon is valid — 3 database lookups hidden in the Form Request. The controller is 3 lines long.",
+      follow_up: "What is the after() hook in FormRequest? How do you add cross-field validation (e.g., end_date must be after start_date)?"
     },
     {
-      question: "What is Laravel validation and why should it be used?",
-      answer: "Validation ensures incoming data has correct type and rules before saving to DB.",
-      example: "$request->validate(['email' => 'required|email', 'name' => 'required']);",
-      use_case: "Avoids broken records and bad user input in production.",
-      follow_up: "Inline validation vs FormRequest validation?"
+      question: "What are Laravel seeders and factories and how do you use them together?",
+      answer: "Seeders insert initial/demo data into the database — used for setting up default roles, categories, or demo content. Factories generate fake model data using the Faker library — used for automated tests and local development. Factories define how to generate one fake record; seeders use factories to create bulk test data. The key benefit: run php artisan migrate:fresh --seed to get a fresh database with realistic test data in one command.",
+      example: "// Model factory — database/factories/UserFactory.php\nclass UserFactory extends Factory {\n    public function definition(): array {\n        return [\n            'name'     => fake()->name(),\n            'email'    => fake()->unique()->safeEmail(),\n            'password' => bcrypt('password'),\n            'role'     => fake()->randomElement(['user', 'editor']),\n        ];\n    }\n    // Custom state for specific scenarios:\n    public function admin(): static {\n        return $this->state(['role' => 'admin']);\n    }\n}\n\n// Seeder — database/seeders/DatabaseSeeder.php\nclass DatabaseSeeder extends Seeder {\n    public function run(): void {\n        // Create 1 admin user with known credentials\n        User::factory()->admin()->create(['email' => 'admin@test.com']);\n        \n        // 50 regular users, each with 3 orders\n        User::factory(50)\n            ->has(Order::factory(3)->has(OrderItem::factory(2)))\n            ->create();\n        \n        // Real data — categories don't use fake names\n        Category::insert([\n            ['name' => 'Electronics'], ['name' => 'Clothing'],\n        ]);\n    }\n}\n\n// Usage:\nphp artisan migrate:fresh --seed  // wipe DB and reseed\n\n// In tests:\n$user = User::factory()->create();  // isolated test user",
+      use_case: "A CI pipeline runs migrate:fresh --seed before every test suite. Tests get predictable data. A new developer runs one command and has 50 realistic users, 200 orders, and 500 products to work with immediately.",
+      follow_up: "What is the difference between DatabaseSeeder and individual seeders? How do you call specific seeders? What is the --class flag?"
     },
     {
-      question: "What is route caching in Laravel?",
-      answer: "Route caching precompiles route definitions for faster boot time in production.",
-      example: "php artisan route:cache",
-      use_case: "Large apps with many routes get faster request handling.",
-      follow_up: "Why do closure routes break route:cache?"
+      question: "What is the difference between routes/web.php and routes/api.php in Laravel?",
+      answer: "web.php applies the 'web' middleware group: session handling, CSRF protection, cookie encryption, flash messages. Designed for browser-facing pages. api.php applies the 'api' middleware group: stateless (no sessions), rate limiting (throttle:api by default), no CSRF. All api.php routes are automatically prefixed with /api. API routes use token authentication (Sanctum, Passport) instead of sessions.",
+      example: "// routes/web.php — session-based, browser routes\nRoute::middleware('auth')->group(function () {\n    Route::get('/dashboard', [DashboardController::class, 'index']);\n    Route::post('/profile', [ProfileController::class, 'update']); // CSRF protected\n    Route::post('/logout', [AuthController::class, 'logout']);      // needs session\n});\n\n// routes/api.php — stateless, /api/* prefix\nRoute::middleware('auth:sanctum')->group(function () {\n    Route::apiResource('products', ProductController::class);\n    Route::get('/user', fn(Request $r) => $r->user()); // mobile app endpoint\n});\n// Accessed at: /api/products, /api/user\n\n// Key differences:\n// web.php: $_SESSION works, @csrf needed in forms, response can be Blade view\n// api.php: no session, no CSRF, response should be JSON, auth via Bearer token\n\n// app/Http/Kernel.php shows the middleware groups:\n// 'web' => [EncryptCookies, StartSession, VerifyCsrfToken, ...]\n// 'api' => [ThrottleRequests, SubstituteBindings]",
+      use_case: "A Laravel app serves both a web dashboard (web.php — Blade views, session auth) and a mobile app API (api.php — JSON responses, Sanctum token auth). Same codebase, two route files, different middleware.",
+      follow_up: "How do you add custom middleware to all API routes? What does the throttle:api rate limiter do and how do you configure it in RouteServiceProvider?"
     },
     {
-      question: "What is config caching in Laravel?",
-      answer: "Config caching combines all config files into one cached file for speed.",
-      example: "php artisan config:cache",
-      use_case: "Improves production performance and startup time.",
-      follow_up: "Why should env() usually not be called outside config files?"
-    },
-    {
-      question: "What are Laravel seeders and factories?",
-      answer: "Seeders insert sample or base data. Factories generate fake model data for tests and local dev.",
-      example: "User::factory()->count(50)->create();",
-      use_case: "Quickly prepare realistic test data for development.",
-      follow_up: "How do seeders help CI test pipelines?"
-    },
-    {
-      question: "What is the difference between web.php and api.php in Laravel?",
-      answer: "web.php uses session, cookies, and CSRF middleware. api.php is stateless and usually used for token-based APIs.",
-      example: "routes/web.php -> dashboard pages\nroutes/api.php -> mobile app endpoints",
-      use_case: "Separate browser flow from API flow clearly.",
-      follow_up: "How are route prefixes applied to api.php by default?"
-    },
-    {
-      question: "How does Laravel pagination work?",
-      answer: "Laravel provides paginate(), simplePaginate(), and cursorPaginate() for easy paginated results.",
-      example: "$users = User::latest()->paginate(15);",
-      use_case: "Efficient list pages without loading huge datasets at once.",
-      follow_up: "When is cursor pagination better than offset pagination?"
+      question: "How does Laravel pagination work and what are the differences between paginate, simplePaginate, and cursorPaginate?",
+      answer: "paginate(15) runs a COUNT query + SELECT with LIMIT/OFFSET — provides total count, last page number, and full page links. simplePaginate(15) only gets the next/previous page links (no COUNT) — faster but no total or page numbers. cursorPaginate(15) uses a cursor (encoded pointer) instead of OFFSET — most efficient for large datasets, stable under concurrent inserts, ideal for infinite scroll. Rule: paginate for numbered pages, simplePaginate/cursorPaginate for 'load more'.",
+      example: "// paginate — full page info (runs COUNT query)\n$products = Product::with('category')->latest()->paginate(15);\n// Returns: data, total, per_page, current_page, last_page, links\n\n// API resource collection with pagination:\nreturn ProductResource::collection($products);\n// Automatically includes 'meta' and 'links' in JSON response\n\n// simplePaginate — next/prev only (no COUNT)\n$products = Product::latest()->simplePaginate(15);\n// Returns: data, per_page, current_page, next_page_url, prev_page_url\n\n// cursorPaginate — cursor-based (no OFFSET, great for large tables)\n$products = Product::latest('id')->cursorPaginate(15);\n// Returns: data, next_cursor, prev_cursor\n// URL: /api/products?cursor=eyJpZCI6MTB9  (base64 encoded)\n\n// In Blade templates:\n{{ $products->links() }}  // renders Bootstrap/Tailwind pagination UI\n\n// Customise:\n$products = Product::paginate(perPage: 20, page: 3); // go to page 3",
+      use_case: "An admin user table uses paginate() — admins need to jump to page 10 of 200. A mobile app's news feed uses cursorPaginate() — no COUNT needed, stable even when new items are inserted between fetches.",
+      follow_up: "What is the problem with OFFSET-based pagination on large tables? (Each page requires scanning all previous rows.) How does cursor pagination solve this?"
     }
   ],
   intermediate: [
@@ -539,81 +518,67 @@ export const laravelInterview: InterviewTopic = {
       follow_up: "What is the difference between synchronous events and queued listeners? What are event observers in Eloquent?"
     },
     {
-      question: "What are Laravel API Resources and why use them?",
-      answer: "API Resources control how model data is returned as JSON. They prevent leaking internal fields and keep response format consistent.",
-      example: "return new UserResource($user);",
-      use_case: "Frontend gets stable API shape even if database columns change.",
-      follow_up: "Resource collection vs single resource?"
+      question: "What are Laravel API Resources and why should you use them?",
+      answer: "API Resources are transformation classes that control exactly what JSON your API returns. Without them, returning $user gives all database columns — including password hash, remember_token, and internal fields. Resources prevent data leakage, allow you to rename/reshape fields without breaking the database schema, add computed fields, and keep your API contract stable even when database columns change. Resource collections handle pagination metadata automatically.",
+      example: "// app/Http/Resources/UserResource.php\nclass UserResource extends JsonResource {\n    public function toArray(Request $request): array {\n        return [\n            'id'        => $this->id,\n            'name'      => $this->name,\n            'email'     => $this->email,\n            'avatar'    => $this->avatar_url,          // renamed from DB column\n            'role'      => $this->role,\n            'joinedAt'  => $this->created_at->toIso8601String(), // formatted\n            'orderCount'=> $this->whenLoaded('orders', fn() => $this->orders->count()), // conditional\n            // password, remember_token, etc. are EXCLUDED\n        ];\n    }\n}\n\n// Single resource:\nreturn new UserResource($user);  // wraps in { data: {...} }\n\n// Collection with pagination:\n$users = User::with('orders')->paginate(15);\nreturn UserResource::collection($users);\n// Returns: { data: [...], links: {...}, meta: { total: 100, per_page: 15, ... } }",
+      use_case: "A mobile app and a web frontend both use the same API. The API Resource ensures both get camelCase field names, no internal DB fields, and consistent date formats — regardless of how the database schema evolves.",
+      follow_up: "What is the difference between a Resource and a Resource Collection? What is the $preserveKeys property? How do you conditionally include relationships only when they are loaded (whenLoaded)?"
     },
     {
-      question: "What is Laravel Sanctum and where is it used?",
-      answer: "Sanctum provides simple token auth for SPAs and mobile apps, and can also support cookie-based SPA auth.",
-      example: "$token = $user->createToken('mobile')->plainTextToken;",
-      use_case: "Secure mobile app APIs without full OAuth complexity.",
-      follow_up: "Sanctum vs Passport?"
+      question: "What is the difference between Laravel Sanctum and Passport?",
+      answer: "Sanctum: lightweight, simple API token authentication and SPA cookie authentication. Tokens are stored in the personal_access_tokens table. No OAuth flows. Ideal for: first-party SPAs (Vue/React frontend + Laravel backend), mobile apps. Passport: full OAuth2 server implementation. Supports authorization codes, client credentials, password grants, refresh tokens. Ideal for: third-party integrations (external apps need to access your API), platforms building a public API with developer keys. 90% of projects need Sanctum. Passport adds significant complexity.",
+      example: "// SANCTUM — simple API token:\ncomposer require laravel/sanctum\nphp artisan vendor:publish --provider='Laravel\\Sanctum\\SanctumServiceProvider'\nphp artisan migrate\n\n// Issue token on login:\npublic function login(Request $request) {\n    if (!Auth::attempt($request->only('email', 'password'))) {\n        return response()->json(['message' => 'Invalid credentials'], 401);\n    }\n    $token = $request->user()->createToken(\n        name: 'mobile-app',\n        abilities: ['products:read', 'orders:write']  // scoped tokens\n    )->plainTextToken;\n    return response()->json(['token' => $token]);\n}\n\n// Protect routes:\nRoute::middleware('auth:sanctum')->get('/user', fn(Request $r) => $r->user());\n\n// Mobile app sends: Authorization: Bearer 1|abc123...\n\n// PASSPORT — OAuth2 (when third parties need to integrate):\n// External developer gets client_id + client_secret\n// They request an access token via /oauth/token\n// Supports scopes, token refresh, client credentials grant",
+      use_case: "Sanctum: your mobile app's token-based login — simple, fast. Passport: you're building a platform where third-party developers need API keys with scopes (like GitHub's API or Shopify's OAuth apps).",
+      follow_up: "What is SPA authentication with Sanctum? How does cookie-based SPA auth differ from token-based auth, and what CSRF considerations apply?"
     },
     {
-      question: "What is Laravel Passport and when do you need it?",
-      answer: "Passport is Laravel's OAuth2 server package. Use it when you need full OAuth flows with clients and scopes.",
-      example: "php artisan passport:install",
-      use_case: "Third-party integrations where external apps access your API with OAuth.",
-      follow_up: "When is Passport overkill?"
+      question: "How do database transactions work in Laravel and when must you use them?",
+      answer: "A transaction wraps multiple database operations into one atomic unit — either ALL succeed (commit) or ALL fail (rollback). Laravel provides DB::transaction() which auto-commits on success and auto-rolls back on any exception. Use transactions whenever two or more related database writes must either both succeed or both fail to maintain data integrity. Without transactions, a crash between two writes leaves inconsistent data.",
+      example: "// DB::transaction() — auto-commit or auto-rollback:\npublic function processOrder(Cart $cart, User $user): Order {\n    return DB::transaction(function () use ($cart, $user) {\n        // Step 1: Create the order\n        $order = Order::create(['user_id' => $user->id, 'total' => $cart->total]);\n\n        // Step 2: Create order items and decrement stock\n        foreach ($cart->items as $item) {\n            $order->items()->create([\n                'product_id' => $item->product_id,\n                'quantity'   => $item->quantity,\n                'price'      => $item->price,\n            ]);\n            // Decrement stock with row-level lock to prevent race conditions\n            Product::where('id', $item->product_id)\n                ->lockForUpdate()  // SELECT ... FOR UPDATE — prevents double-booking\n                ->decrement('stock', $item->quantity);\n        }\n\n        // Step 3: Mark cart as converted\n        $cart->update(['status' => 'converted']);\n\n        // If ANY step throws an exception:\n        // → All changes above are ROLLED BACK automatically\n        return $order;\n    });\n}\n\n// Manual control for more complex scenarios:\nDB::beginTransaction();\ntry {\n    // ... operations ...\n    DB::commit();\n} catch (\\Exception $e) {\n    DB::rollBack();\n    throw $e;\n}",
+      use_case: "Checkout: create order + deduct inventory + charge payment. If payment fails, the order and inventory changes must roll back. Without a transaction, you'd have an order with no payment and incorrectly reduced stock.",
+      follow_up: "What is DB::transaction() return value? How do you set the isolation level? What is lockForUpdate() and when do you use it to prevent race conditions?"
     },
     {
-      question: "How do database transactions work in Laravel?",
-      answer: "Transactions wrap multiple DB operations so all succeed or all rollback.",
-      example: "DB::transaction(function () {\n  // create order\n  // update stock\n});",
-      use_case: "Avoid partial checkout data when payment fails mid-flow.",
-      follow_up: "What happens if exception is thrown inside transaction?"
+      question: "What are polymorphic relationships in Eloquent and when do you use them?",
+      answer: "A polymorphic relationship allows one model to belong to multiple different model types using a single set of columns. The related table stores both the related ID (like_id) and the model type (like_type). Use polymorphic relationships when the same feature (comments, likes, tags, images, notifications) applies to multiple unrelated models. Alternative: separate tables per model type — but that creates duplication and prevents unified queries.",
+      example: "// The 'comments' table has: id, body, commentable_id, commentable_type\n// commentable_type is 'App\\Models\\Post' or 'App\\Models\\Video'\n\n// Post model:\nclass Post extends Model {\n    public function comments(): MorphMany {\n        return $this->morphMany(Comment::class, 'commentable');\n    }\n}\n\n// Video model:\nclass Video extends Model {\n    public function comments(): MorphMany {\n        return $this->morphMany(Comment::class, 'commentable');\n    }\n}\n\n// Comment model:\nclass Comment extends Model {\n    public function commentable(): MorphTo {\n        return $this->morphTo(); // can return a Post or Video\n    }\n}\n\n// Usage:\n$post->comments()->create(['body' => 'Great post!', 'user_id' => 1]);\n$video->comments()->create(['body' => 'Nice video!', 'user_id' => 1]);\n\n// Get what a comment belongs to (auto-resolves type):\n$comment->commentable; // returns Post or Video instance\n\n// Many-to-many polymorphic (tags on posts AND videos):\n// Uses 'taggables' pivot table: tag_id, taggable_id, taggable_type\nclass Post extends Model {\n    public function tags(): MorphToMany {\n        return $this->morphToMany(Tag::class, 'taggable');\n    }\n}",
+      use_case: "A platform where posts, videos, and events can all have comments, likes, and tags. Without polymorphism: 3 comment tables, 3 like tables, 3 tag tables = 9 tables. With polymorphism: 3 shared tables, cleaner code.",
+      follow_up: "What is the performance consideration with polymorphic relationships? Why can't you add a foreign key constraint on the *_id column in a polymorphic table? How do you morph maps help?"
     },
     {
-      question: "What is polymorphic relationship in Eloquent?",
-      answer: "Polymorphic relationships allow one model to belong to multiple model types.",
-      example: "Comment can belong to Post or Video using morphTo.",
-      use_case: "Reusable comments, likes, attachments across many entities.",
-      follow_up: "morphOne vs morphMany vs morphedByMany?"
+      question: "How does Laravel's Task Scheduling work?",
+      answer: "The Laravel Scheduler lets you define all recurring tasks in code (app/Console/Kernel.php) and requires only ONE cron entry on the server. Without it, you'd add a new cron line for every task. Tasks can run on standard frequencies (daily, hourly, weekly) or custom cron expressions. The scheduler prevents overlap (withoutOverlapping), can run in background, send output to email, and log results.",
+      example: "// app/Console/Kernel.php\nprotected function schedule(Schedule $schedule): void {\n    // Daily report at 8am\n    $schedule->command('report:send --type=daily')\n             ->dailyAt('08:00')\n             ->onSuccess(function () { Log::info('Daily report sent'); })\n             ->onFailure(function () { /* alert team */ });\n\n    // Every 5 minutes — but don't overlap if previous run is still going\n    $schedule->command('sync:inventory')\n             ->everyFiveMinutes()\n             ->withoutOverlapping()\n             ->runInBackground(); // non-blocking\n\n    // Weekly cleanup every Sunday midnight\n    $schedule->command('db:cleanup')->weekly()->sundays()->at('00:00');\n\n    // Closure task:\n    $schedule->call(function () {\n        User::where('last_login_at', '<', now()->subYear())->update(['status' => 'inactive']);\n    })->monthly();\n\n    // Custom cron expression:\n    $schedule->command('stats:aggregate')->cron('0 */4 * * *'); // every 4 hours\n}\n\n// ONE cron entry on server (runs every minute, Laravel decides what to execute):\n// * * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1",
+      use_case: "An e-commerce app schedules: daily abandoned cart emails (8am), hourly inventory sync with supplier API, weekly user retention reports, and monthly old session cleanup — all managed in one file, zero extra cron lines.",
+      follow_up: "What is schedule:work for local development? How do you test scheduled tasks? What is withoutOverlapping and what problem does it solve?"
     },
     {
-      question: "How do you schedule tasks in Laravel?",
-      answer: "Use Laravel Scheduler to define recurring tasks in code and trigger with one cron entry.",
-      example: "$schedule->command('report:daily')->dailyAt('08:00');",
-      use_case: "Auto send daily reports, cleanup old data, sync external APIs.",
-      follow_up: "How do you prevent overlapping scheduled commands?"
+      question: "What is Laravel's caching system and how do you use it effectively?",
+      answer: "Laravel provides a unified caching API across drivers (Redis, Memcached, file, database, array). Cache expensive operations (DB queries, API calls, computations) and serve results from fast storage. Key methods: Cache::remember (get from cache or run the callback and store), Cache::put (store), Cache::forget (invalidate), Cache::tags (group related cache entries for bulk invalidation). Redis is the recommended driver for production.",
+      example: "// Cache::remember — get or compute:\n$products = Cache::remember('products:featured', 3600, function () {\n    return Product::with('category')\n        ->where('featured', true)\n        ->orderByDesc('sales_count')\n        ->get();\n});\n// Next 3600 seconds: served from cache, no DB query\n\n// Cache with tags — invalidate related entries together:\nCache::tags(['products', 'category:1'])->remember('products:category:1', 600, fn() =>\n    Product::where('category_id', 1)->get()\n);\n\n// When product is updated:\nCache::tags(['products'])->flush(); // invalidates ALL product caches\n\n// Observer auto-invalidation:\nclass ProductObserver {\n    public function saved(Product $product): void {\n        Cache::forget(\"product:{$product->id}\");\n        Cache::tags(['products'])->flush();\n    }\n}\n\n// Cache::lock — prevent cache stampede:\n$lock = Cache::lock('products:rebuild', 10);\nif ($lock->get()) {\n    try {\n        $result = expensiveOperation();\n        Cache::put('products:featured', $result, 3600);\n    } finally {\n        $lock->release();\n    }\n}",
+      use_case: "Homepage with 100k visitors/day: featured products query takes 200ms. With Redis cache (60-second TTL): 200ms once per minute, then <1ms for 100k subsequent requests — 99.9% DB query reduction.",
+      follow_up: "What is a cache stampede? How does Cache::lock prevent it? What is the difference between cache:forget and cache:flush?"
     },
     {
-      question: "What is Laravel caching strategy in real apps?",
-      answer: "Cache expensive reads using Redis/memcached, set TTL, and invalidate on write operations.",
-      example: "Cache::remember('products:top', 600, fn () => Product::top()->get());",
-      use_case: "Reduce DB load on high-traffic homepage queries.",
-      follow_up: "What is cache invalidation challenge?"
+      question: "How do you handle file uploads safely in Laravel?",
+      answer: "File uploads require validation, safe storage, and security hardening. Validate file type using MIME detection (not just extension), enforce size limits, rename files to prevent overwriting and path traversal. Store outside webroot or use cloud storage (S3). Never trust $_FILES['type'] — it's user-controlled. Laravel's Storage facade handles local and cloud storage with a unified API.",
+      example: "// Form Request validation:\npublic function rules(): array {\n    return [\n        'avatar' => [\n            'required',\n            'file',\n            'mimes:jpg,jpeg,png,webp', // checks actual MIME type, not just extension\n            'max:2048',               // max 2MB in kilobytes\n            'dimensions:min_width=100,min_height=100,max_width=2000'\n        ],\n        'document' => 'nullable|file|mimetypes:application/pdf|max:10240',\n    ];\n}\n\n// Controller — secure storage:\npublic function updateAvatar(UpdateAvatarRequest $request, User $user) {\n    $file = $request->file('avatar');\n\n    // Generate a unique, non-guessable filename\n    $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();\n\n    // Store in 'avatars' directory on 'public' disk\n    // OR: 's3' disk for production\n    $path = $file->storeAs('avatars', $filename, 'public');\n\n    // Delete old avatar if exists\n    if ($user->avatar_path) {\n        Storage::disk('public')->delete($user->avatar_path);\n    }\n\n    $user->update(['avatar_path' => $path]);\n\n    return response()->json(['url' => Storage::url($path)]);\n}\n\n// Serving private files securely (not publicly accessible):\npublic function download(Document $document) {\n    $this->authorize('view', $document);\n    return Storage::download($document->path, 'invoice.pdf');\n}",
+      use_case: "KYC document uploads for a fintech app: files are stored on S3 with private ACL, served through a signed URL that expires in 15 minutes — users can't share download links, and files aren't publicly guessable.",
+      follow_up: "What is the difference between store() and storeAs()? How do you configure S3 as the default storage disk? What is a temporary signed URL for private files?"
     },
     {
-      question: "How do you upload files safely in Laravel?",
-      answer: "Validate file type and size, store with generated name, and prefer cloud/object storage in production.",
-      example: "$path = $request->file('avatar')->store('avatars', 'public');",
-      use_case: "User profile uploads, invoice PDFs, and KYC documents.",
-      follow_up: "Why should extension check alone be avoided?"
+      question: "How do you handle exceptions globally in Laravel and return consistent API error responses?",
+      answer: "Laravel's exception handler is in app/Exceptions/Handler.php. The register() method lets you define how specific exceptions are reported and rendered. For APIs, use renderable() to return consistent JSON error responses. The withExceptions() callback in bootstrap/app.php (Laravel 11) or register() (Laravel 10 and below) is where you centralize all error handling logic instead of scattering try-catch blocks everywhere.",
+      example: "// app/Exceptions/Handler.php (Laravel 10 style)\npublic function register(): void {\n    // Report specific exceptions to Sentry/Bugsnag:\n    $this->reportable(function (\\Exception $e) {\n        if (app()->bound('sentry')) {\n            app('sentry')->captureException($e);\n        }\n    });\n\n    // Render exceptions as consistent JSON for API:\n    $this->renderable(function (ModelNotFoundException $e, Request $request) {\n        if ($request->expectsJson()) {\n            return response()->json([\n                'message' => 'Resource not found',\n                'error'   => 'not_found'\n            ], 404);\n        }\n    });\n\n    $this->renderable(function (ValidationException $e, Request $request) {\n        if ($request->expectsJson()) {\n            return response()->json([\n                'message' => 'Validation failed',\n                'errors'  => $e->errors()\n            ], 422);\n        }\n    });\n\n    $this->renderable(function (AuthorizationException $e, Request $request) {\n        if ($request->expectsJson()) {\n            return response()->json(['message' => 'Forbidden'], 403);\n        }\n    });\n}\n\n// Custom exception for business logic:\nclass InsufficientStockException extends \\Exception {\n    public function render(): JsonResponse {\n        return response()->json(['message' => $this->getMessage(), 'error' => 'insufficient_stock'], 422);\n    }\n}",
+      use_case: "A mobile app gets consistent JSON error shapes for every error type: 422 with field errors for validation, 404 for missing resources, 403 for authorization failures, 500 for server errors — all handled centrally, zero try-catch in controllers.",
+      follow_up: "What is the difference between reportable and renderable in Laravel's exception handler? What is the $dontReport array used for?"
     },
     {
-      question: "What is Laravel policy auto-discovery?",
-      answer: "Laravel can automatically map model policies based on naming conventions.",
-      example: "Post model -> PostPolicy class auto-resolved.",
-      use_case: "Cleaner authorization setup with less manual registration.",
-      follow_up: "When should you register policy manually?"
-    },
-    {
-      question: "How do you handle exceptions globally in Laravel?",
-      answer: "Use App\\Exceptions\\Handler to report and render exceptions consistently.",
-      example: "return response()->json(['message' => 'Server error'], 500);",
-      use_case: "Consistent API error responses and cleaner logs.",
-      follow_up: "How to return different error formats for web and API?"
-    },
-    {
-      question: "What is common Laravel interview mistake in intermediate level?",
-      answer: "Putting all business logic in controllers and not using services/actions.",
-      example: "500-line controller with pricing and payment rules.",
-      use_case: "Hard testing and frequent regressions during changes.",
-      follow_up: "How would you refactor fat controllers safely?"
+      question: "What is a 'fat controller' anti-pattern in Laravel and how do you refactor it?",
+      answer: "A fat controller is one that contains business logic, data transformation, third-party API calls, and email sending — often 300-500+ lines. Problems: impossible to unit test (business logic locked behind HTTP layer), hard to reuse logic in queue jobs or CLI commands, violates Single Responsibility Principle. Solution: extract logic into Service classes or Action classes. Controllers become thin request routers that validate input and delegate to services.",
+      example: "// FAT CONTROLLER — 200 lines of business logic:\npublic function checkout(Request $request) {\n    // validate, fetch cart, apply coupon, calculate tax,\n    // charge Stripe, send email, update inventory, create order...\n    // All in one function. Impossible to test without HTTP.\n}\n\n// REFACTORED — thin controller + service:\n// app/Services/CheckoutService.php:\nclass CheckoutService {\n    public function __construct(\n        private InventoryService $inventory,\n        private PaymentGateway $payment,\n        private MailerService $mailer\n    ) {}\n\n    public function process(User $user, Cart $cart, string $paymentToken): Order {\n        return DB::transaction(function () use ($user, $cart, $paymentToken) {\n            $order = Order::create(['user_id' => $user->id, 'total' => $cart->total]);\n            $this->inventory->decrement($cart->items);\n            $this->payment->charge($cart->total, $paymentToken);\n            $this->mailer->sendOrderConfirmation($order);\n            return $order;\n        });\n    }\n}\n\n// Controller — just routing:\npublic function checkout(CheckoutRequest $request) {\n    $order = $this->checkoutService->process(\n        user: $request->user(),\n        cart: Cart::forUser($request->user()),\n        paymentToken: $request->payment_token\n    );\n    return new OrderResource($order);\n}  // 7 lines!\n\n// Now unit-testable without HTTP, reusable in queue jobs",
+      use_case: "A payment service can now be tested with mocked Stripe and fake cart objects. The same service method is called from both the API controller and a queue job for retry logic — zero code duplication.",
+      follow_up: "What is the difference between a Service class and an Action class (single-method service)? When is it better to use Actions over Services?"
     }
   ],
   advanced: [
@@ -640,80 +605,45 @@ export const laravelInterview: InterviewTopic = {
     },
     {
       question: "How do you design a scalable Laravel architecture for high traffic?",
-      answer: "Keep app stateless, use Redis for cache/session/queues, separate read replicas, and scale app servers horizontally.",
-      example: "Nginx -> multiple Laravel app nodes -> Redis + MySQL primary/replica",
-      use_case: "Scale from thousands to millions of API calls/day with minimal downtime.",
-      follow_up: "Why are file sessions a problem in multi-server setup?"
+      answer: "Stateless app servers (no server-local state), Redis for sessions/cache/queues, read replicas for heavy read queries, horizontal app server scaling behind a load balancer, CDN for static assets and media, queue workers on separate servers for async processing, database connection pooling (PgBouncer for PostgreSQL), and proper indexing. The key principle: if one server fails or a new one is added, the application should work exactly the same.",
+      example: "// Infrastructure layout:\n// CDN (Cloudflare) → Load Balancer (Nginx) → App Servers (Laravel x3)\n//                                           ↓\n//                                   Redis (sessions, cache, queues)\n//                                           ↓\n//                          MySQL Primary (writes) + Replica (reads)\n\n// config/database.php — read/write separation:\n'mysql' => [\n    'read' => [\n        'host' => [env('DB_REPLICA_HOST', '127.0.0.1')]\n    ],\n    'write' => [\n        'host' => [env('DB_HOST', '127.0.0.1')]\n    ],\n    'sticky' => true, // use write connection for rest of request after write\n]\n\n// config/session.php — Redis sessions (works across all app servers)\n'driver' => 'redis',\n\n// config/cache.php — Redis cache:\n'default' => 'redis',\n\n// config/queue.php — Redis queue (dedicated worker servers):\n'default' => 'redis',\n\n// Separate queue workers handle emails, notifications, reports:\n// php artisan queue:work redis --queue=critical,default,low --sleep=3",
+      use_case: "A SaaS app grows from 100 to 100,000 users. With file sessions: 3 app servers can't share sessions. Switching to Redis sessions: any server handles any request. Add a replica: reads drop from 200ms to 20ms.",
+      follow_up: "Why are file sessions a problem in a multi-server setup? What happens when a user's request hits server A but their session is on server B? How does sticky sessions partially solve this but create its own problems?"
     },
     {
       question: "How do you do zero-downtime Laravel deployments?",
-      answer: "Use atomic release strategy, run safe migrations, warm caches, and restart queue workers gracefully.",
-      example: "Deploy new release folder then switch symlink.",
-      use_case: "Users continue requests while new version goes live.",
-      follow_up: "What migration patterns can still cause downtime?"
+      answer: "Zero-downtime deployment uses the atomic symlink strategy: deploy to a new 'release' directory, run migrations and warm caches, then atomically switch a symlink from the old release to the new one. The symlink switch is nearly instant — in-flight requests finish against the old code, new requests hit the new code. Key requirement: migrations must be backward-compatible (the old code must work with the new schema during the transition window).",
+      example: "// Deployment flow with Laravel Deployer / Envoyer:\n// 1. Upload new release to: /var/www/app/releases/20240115_120000/\n// 2. Install dependencies: composer install --no-dev --optimize-autoloader\n// 3. Run SAFE migrations (only additive, never destructive):\n//    php artisan migrate --force\n// 4. Warm caches:\n//    php artisan config:cache && php artisan route:cache && php artisan view:cache\n// 5. Switch symlink (atomic, near-instant):\n//    ln -sfn /var/www/app/releases/20240115_120000 /var/www/app/current\n// 6. Gracefully restart queue workers:\n//    php artisan queue:restart  (workers finish current job, then restart)\n\n// SAFE migration patterns (backward-compatible):\n// ✓ Adding a new nullable column: old code ignores it\n// ✓ Adding a new table: old code ignores it\n// ✓ Adding an index: non-blocking in MySQL 5.6+ (online DDL)\n// ✗ Dropping a column the old code uses\n// ✗ Renaming a column (do it in 3 deploys: add new, migrate data, drop old)\n// ✗ Changing column type that affects the old code",
+      use_case: "A production database migration adds a new column. During deployment, for 30 seconds both old and new code run against the same schema. New column is nullable so old code works fine. After symlink switch, new code uses the new column. No downtime, no errors.",
+      follow_up: "What is a 3-phase migration pattern for renaming a column without downtime? What is Envoyer and how does it automate zero-downtime deployments for Laravel?"
     },
     {
-      question: "How do you prevent race conditions in Laravel checkout flow?",
-      answer: "Use DB transactions, row-level locking, and idempotency keys for critical operations.",
-      example: "DB::transaction + lockForUpdate() on inventory row.",
-      use_case: "Avoid overselling same item during flash sales.",
-      follow_up: "What is difference between optimistic and pessimistic locking?"
+      question: "How do you prevent race conditions in a Laravel checkout flow?",
+      answer: "Race conditions in checkout: two users buy the last item simultaneously, both see stock = 1, both pass the check, both orders are created — stock goes to -1 (overselling). Solutions: database-level locking with lockForUpdate() (pessimistic locking — blocks concurrent reads), optimistic locking (check version/timestamp, retry if conflict), or atomic SQL decrements with a WHERE condition. Always wrap in a transaction.",
+      example: "// RACE CONDITION — two concurrent requests both see stock=1:\n// Request A: $product->stock == 1 → true\n// Request B: $product->stock == 1 → true (at the same time!)\n// Request A: creates order, decrements stock to 0\n// Request B: creates order, decrements stock to -1 ← oversell!\n\n// SOLUTION 1: pessimistic locking with lockForUpdate():\npublic function purchase(Product $product, int $qty): Order {\n    return DB::transaction(function () use ($product, $qty) {\n        // Lock the row — concurrent requests wait here\n        $product = Product::where('id', $product->id)\n            ->lockForUpdate()  // SELECT ... FOR UPDATE\n            ->firstOrFail();\n\n        if ($product->stock < $qty) {\n            throw new InsufficientStockException('Not enough stock');\n        }\n\n        $product->decrement('stock', $qty); // atomic\n        return Order::create(['product_id' => $product->id, 'qty' => $qty]);\n    });\n}\n\n// SOLUTION 2: optimistic locking (no blocking, retries on conflict):\n// Add 'version' column to products\nProduct::where('id', $id)\n    ->where('version', $currentVersion)\n    ->where('stock', '>=', $qty)\n    ->update([\n        'stock' => DB::raw(\"stock - $qty\"),\n        'version' => DB::raw('version + 1')\n    ]);\n// If 0 rows updated: someone else got there first → retry or fail\n\n// SOLUTION 3: atomic decrement with WHERE guard:\n$updated = Product::where('id', $id)\n    ->where('stock', '>=', $qty)\n    ->decrement('stock', $qty);\nif (!$updated) throw new InsufficientStockException();",
+      use_case: "A flash sale with 1000 users buying the last 100 units simultaneously. Without locks: 200 orders created for 100 items. With lockForUpdate(): first 100 requests succeed instantly, remaining 900 wait briefly and get InsufficientStockException — exactly correct behavior.",
+      follow_up: "What is the difference between pessimistic locking (lockForUpdate) and optimistic locking? When does optimistic locking perform better than pessimistic locking? What is a deadlock and how do you detect and prevent it?"
     },
     {
       question: "How do you implement multi-tenant architecture in Laravel?",
-      answer: "Scope all data by tenant, isolate configs, and enforce tenant context globally.",
-      example: "Global scope adds tenant_id to every query.",
-      use_case: "SaaS platform where one company's data never leaks to another.",
-      follow_up: "Single DB multi-tenant vs DB-per-tenant trade-offs?"
+      answer: "Multi-tenancy means one application serves multiple organizations (tenants) with complete data isolation. Two main approaches: Single database with tenant_id column on every table (simpler, lower cost, requires Global Scopes to enforce isolation), or separate database per tenant (stronger isolation, easier backup/restore per tenant, harder to manage at scale). The key danger in single-DB: forgetting to scope queries by tenant exposes one tenant's data to another. Laravel's Global Scopes automate this.",
+      example: "// APPROACH 1: Single DB with Global Scope\n// Every tenant table has: tenant_id FK\n// Global scope applied to all tenant models:\n\n// app/Models/Scopes/TenantScope.php\nclass TenantScope implements Scope {\n    public function apply(Builder $builder, Model $model): void {\n        $tenantId = app(TenantContext::class)->id();\n        if ($tenantId) {\n            $builder->where($model->getTable() . '.tenant_id', $tenantId);\n        }\n    }\n}\n\n// app/Models/BaseModel.php (all tenant models extend this)\nclass BaseModel extends Model {\n    protected static function booted(): void {\n        static::addGlobalScope(new TenantScope());\n        static::creating(function ($model) {\n            $model->tenant_id = app(TenantContext::class)->id();\n        });\n    }\n}\n\n// Middleware resolves tenant from subdomain:\nclass ResolveTenant {\n    public function handle(Request $request, Closure $next) {\n        $subdomain = explode('.', $request->getHost())[0]; // acme.myapp.com\n        $tenant = Tenant::where('slug', $subdomain)->firstOrFail();\n        app(TenantContext::class)->set($tenant->id);\n        return $next($request);\n    }\n}\n\n// Now: Product::all() automatically returns only current tenant's products",
+      use_case: "A SaaS HR platform serves 500 companies. Company A's employees are completely isolated from Company B's. A developer forgets to add tenant_id to a query — the Global Scope adds it automatically, preventing accidental data leakage.",
+      follow_up: "What are the trade-offs between single-database multi-tenancy (tenant_id on every table) vs database-per-tenant? Which scales better? How do you handle migrations across 500 tenant databases?"
     },
     {
-      question: "How do you handle large exports in Laravel?",
-      answer: "Process exports in queued chunks and stream output instead of loading everything in memory.",
-      example: "Chunk users by 1000 rows and write CSV in background job.",
-      use_case: "Export 2M rows without request timeout or memory crash.",
-      follow_up: "Why are sync exports risky for production?"
+      question: "How do you handle large data exports in Laravel without timeouts or memory crashes?",
+      answer: "Never load millions of rows into memory at once. Solutions: chunk() processes rows in batches (1000 at a time), lazy() uses a generator to stream rows without loading all into memory, LazyCollection gives a memory-efficient pipeline. For exports delivered asynchronously: queue a background job, write the file to storage (S3), notify the user with a download link. Never do a synchronous export that blocks an HTTP request for millions of rows.",
+      example: "// WRONG — loads ALL records into memory:\n$users = User::all(); // Memory exhausted with 1M rows!\n\n// CORRECT 1: chunk() — processes 1000 at a time:\nUser::orderBy('id')->chunk(1000, function ($users) use ($csv) {\n    foreach ($users as $user) {\n        fputcsv($csv, [$user->id, $user->name, $user->email]);\n    }\n});\n\n// CORRECT 2: lazy() — memory-efficient generator:\nUser::where('active', true)->lazy(1000)->each(function (User $user) use ($csv) {\n    fputcsv($csv, [$user->id, $user->name]);\n});\n\n// PRODUCTION PATTERN: background job + S3 + notification:\nclass ExportUsersJob implements ShouldQueue {\n    use Queueable;\n\n    public function handle(): void {\n        $filename = 'exports/users-' . now()->format('YmdHis') . '.csv';\n\n        $stream = fopen('php://temp', 'w');\n        User::orderBy('id')->lazy(1000)->each(function (User $user) use ($stream) {\n            fputcsv($stream, [$user->id, $user->name, $user->email, $user->created_at]);\n        });\n\n        rewind($stream);\n        Storage::put($filename, $stream);\n        fclose($stream);\n\n        // Generate signed URL (expires in 24 hours) and email it\n        $url = Storage::temporaryUrl($filename, now()->addDay());\n        Mail::to($this->requestingUser)->send(new ExportReadyMail($url));\n    }\n}\n\n// Controller — returns immediately:\npublic function export() {\n    ExportUsersJob::dispatch(auth()->user());\n    return response()->json(['message' => 'Export started. You will receive an email when ready.']);\n}",
+      use_case: "An admin needs to export 5 million user records. Sync export: 10-minute HTTP request, nginx timeout, browser abort, user gets nothing. Async job: API returns in 50ms, background job runs for 8 minutes, admin gets an email with a 24-hour download link.",
+      follow_up: "What is the difference between chunk() and lazy() in Laravel? What is the performance difference? When would you use each? How do you handle exports using the Laravel Excel package?"
     },
     {
-      question: "How do you secure Laravel APIs at advanced level?",
-      answer: "Use auth + authorization, request validation, rate limits, audit logs, and strict error handling.",
-      example: "Route::middleware(['auth:sanctum', 'throttle:api'])->group(...)",
-      use_case: "Protect fintech/health APIs from abuse and privilege escalation.",
-      follow_up: "How do you design role + permission checks cleanly?"
-    },
-    {
-      question: "How do you monitor Laravel in production?",
-      answer: "Use centralized logs, APM traces, queue failure alerts, and DB slow query monitoring.",
-      example: "Track p95 latency, failed jobs count, error rate dashboards.",
-      use_case: "Catch performance regressions before users complain.",
-      follow_up: "Which 3 alerts would you set first?"
-    },
-    {
-      question: "How do you handle eventual consistency with queued listeners?",
-      answer: "Design idempotent listeners, retries, and clear status transitions for delayed updates.",
-      example: "Order created now, invoice generated by queue worker later.",
-      use_case: "Reliable async workflows across payment, email, analytics.",
-      follow_up: "How do you avoid duplicate side effects after retries?"
-    },
-    {
-      question: "How do you tune Laravel Horizon for heavy queue workloads?",
-      answer: "Configure queue priorities, worker counts, balancing, and retry/backoff based on job profile.",
-      example: "High-priority queue for payments, low-priority for reports.",
-      use_case: "Keep critical jobs fast even under heavy background load.",
-      follow_up: "What metrics in Horizon tell you workers are overloaded?"
-    },
-    {
-      question: "How do you approach legacy Laravel upgrade safely?",
-      answer: "Upgrade version-by-version, add regression tests, and replace deprecated APIs in small steps.",
-      example: "Laravel 8 -> 9 -> 10 with CI checks on each stage.",
-      use_case: "Modernize old app without breaking business-critical flows.",
-      follow_up: "Why is one-shot major upgrade risky?"
-    },
-    {
-      question: "Tricky advanced Laravel question: should every query be cached?",
-      answer: "No. Cache only expensive and frequently read data with clear invalidation strategy.",
-      example: "Cache product list, but not always-changing cart count.",
-      use_case: "Good performance without stale or inconsistent user data.",
-      follow_up: "How do you pick safe cache TTL per feature?"
+      question: "What does a production-ready Laravel API security checklist look like?",
+      answer: "Security layers: Authentication (Sanctum/Passport), Authorization (Policies/Gates for every resource), Rate limiting (throttle per route/user), Input validation (FormRequest with strict rules), Output sanitization (API Resources — never raw model), SQL injection prevention (Eloquent/PDO always), HTTPS enforcement, security headers, audit logging for sensitive actions, and regular dependency vulnerability scanning.",
+      example: "// 1. Route-level: auth + rate limiting\nRoute::middleware(['auth:sanctum', 'throttle:api'])->group(function () {\n    Route::apiResource('users', UserController::class);\n    // Sensitive endpoints: stricter limits\n    Route::post('/export', [ExportController::class, 'create'])\n         ->middleware('throttle:5,60'); // 5 requests per 60 seconds\n});\n\n// 2. Controller: authorize every action\npublic function update(UpdateUserRequest $request, User $user) {\n    $this->authorize('update', $user);  // PostPolicy::update()\n    // ...\n}\n\n// 3. FormRequest: strict validation\npublic function rules(): array {\n    return [\n        'email' => 'required|email|max:255',\n        'role'  => 'required|in:user,editor',  // enum validation — never accept arbitrary roles\n        // 'is_admin' is NOT in rules — cannot be set by API\n    ];\n}\n\n// 4. API Resource: explicit output (no password, token leaks)\nreturn new UserResource($user); // only exposes defined fields\n\n// 5. Security headers middleware:\n$response->headers->set('X-Content-Type-Options', 'nosniff');\n$response->headers->set('X-Frame-Options', 'DENY');\n$response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');\n\n// 6. Audit logging for sensitive actions:\nafter update: AuditLog::create(['action' => 'user.role_changed', 'by' => auth()->id()]);\n\n// 7. Dependency scanning:\ncomposer audit  // check for known vulnerabilities",
+      use_case: "A fintech API: every endpoint is authenticated, every resource action is authorized, every input is validated with strict enums, every response goes through a Resource, and every privilege escalation (role change, large transfer) is audit-logged with user ID and timestamp.",
+      follow_up: "How do you implement role-based access control (RBAC) cleanly in Laravel? Should you use Gates/Policies directly, or a package like Spatie Laravel Permission? What are the trade-offs?"
     }
   ]
 };
