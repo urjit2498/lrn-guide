@@ -274,14 +274,14 @@ export function ProfilePanel({ user }: ProfilePanelProps) {
                   aria-label="Edit profile"
                   title="Edit profile"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H8v-2.414a2 2 0 01.586-1.414z" />
                   </svg>
                 </button>
               )}
               <button
                 onClick={() => { setOpen(false); setConfirmDelete(false); }}
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-xl leading-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Close"
               >
                 &times;

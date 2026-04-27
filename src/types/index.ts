@@ -15,6 +15,7 @@ export interface ContentSection {
   explanation: string;         // Simple language explanation
   realWorldExample: string;    // How it's used in real projects
   practicalUseCase: string;    // Hands-on scenario
+  keyPoints?: string[];        // Quick-reference bullet facts
   codeExample?: string;        // Optional code snippet
   exercise?: string;           // Small task for the learner
 }

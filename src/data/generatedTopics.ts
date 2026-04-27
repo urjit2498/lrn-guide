@@ -1,5 +1,6 @@
 import { Level, LevelContent, Topic, InterviewQA, ContentSection } from '@/types';
 import { TopicMeta, TOPIC_META } from './topicMeta';
+import { SPECIFIC_CONTENT } from './content';
 
 interface LevelConfig {
   level: Level;
@@ -6498,8 +6499,22 @@ const createSection = (
   moduleName: string,
   levelConfig: LevelConfig,
 ): ContentSection => {
-  const comparison = topicVsComparisons[topicId];
   const title = `${moduleName} - ${levelConfig.titleSuffix}`;
+  const specific = SPECIFIC_CONTENT[topicId]?.[moduleName];
+
+  if (specific) {
+    return {
+      title,
+      explanation: specific.explanation,
+      realWorldExample: specific.realWorldExample,
+      practicalUseCase: specific.practicalUseCase,
+      keyPoints: specific.keyPoints,
+      codeExample: createCodeExample(topicId, moduleName),
+      exercise: `Practice: ${specific.practicalUseCase}`,
+    };
+  }
+
+  const comparison = topicVsComparisons[topicId];
   return {
     title,
     explanation:
@@ -6530,8 +6545,23 @@ const createInterviewQuestions = (
 ): InterviewQA[] => {
   const comparison = topicVsComparisons[topicId];
   const base = modules.slice(0, 10);
+  const topicContent = SPECIFIC_CONTENT[topicId];
 
-  return base.map((moduleName, index) => ({
+  const specificQAs: InterviewQA[] = [];
+  if (topicContent) {
+    for (const moduleName of base) {
+      const specific = topicContent[moduleName];
+      if (specific?.interviewQA?.length) {
+        specificQAs.push(...specific.interviewQA);
+      }
+    }
+  }
+
+  if (specificQAs.length >= 3) {
+    return specificQAs.slice(0, 10);
+  }
+
+  const genericQAs = base.map((moduleName, index) => ({
     question: `In ${topicName} (${level}), how would you explain "${moduleName}" in a real project?`,
     answer:
       `I explain ${moduleName.toLowerCase()} using a practical example, then I describe common mistakes, ` +
@@ -6540,6 +6570,8 @@ const createInterviewQuestions = (
       `Use case ${index + 1}: implement ${moduleName.toLowerCase()} in a real feature, monitor impact, and improve based on feedback.`,
     follow_up: `Compare "${moduleName}" with another approach and explain why you choose one. Example comparison: ${comparison}.`,
   }));
+
+  return [...specificQAs, ...genericQAs].slice(0, 10);
 };
 
 const createLevelContent = (

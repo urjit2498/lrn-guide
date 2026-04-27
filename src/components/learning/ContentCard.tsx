@@ -107,6 +107,23 @@ export function ContentCard({ section, index, highlightQuery = '', highlightTitl
           <Highlight text={section.explanation} query={highlightQuery} />
         </p>
 
+        {/* Key points */}
+        {section.keyPoints && section.keyPoints.length > 0 && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/40 rounded-xl p-3.5">
+            <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-2 flex items-center gap-1.5">
+              <span>⚡</span> Key Points
+            </p>
+            <ul className="space-y-1">
+              {section.keyPoints.map((point, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 leading-snug">
+                  <span className="text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5">•</span>
+                  <Highlight text={point} query={highlightQuery} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Real-world example */}
         <InfoBlock
           icon="🌍"
