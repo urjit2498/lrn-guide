@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { InterviewQA as IQA } from '@/types';
 import { clsx } from 'clsx';
 import { Highlight, slugify } from '@/lib/highlight';
+import { RichContent } from './RichContent';
 
 interface InterviewQAProps {
   questions: IQA[];
@@ -70,28 +71,38 @@ export function InterviewQA({ questions, highlightQuery = '', highlightTitle = '
                   <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1.5 flex items-center gap-1">
                     <span>✅</span> Answer
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    {qa.answer}
-                  </p>
+                  <RichContent text={qa.answer} highlightQuery={highlightQuery} />
 
                   {qa.example && (
                     <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-3">
                       <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">Example</p>
-                      <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">{qa.example}</p>
+                      <RichContent
+                        text={qa.example}
+                        highlightQuery={highlightQuery}
+                        className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed"
+                      />
                     </div>
                   )}
 
                   {qa.use_case && (
                     <div className="mt-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg p-3">
                       <p className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1">Real-world Use Case</p>
-                      <p className="text-sm text-purple-800 dark:text-purple-200 leading-relaxed">{qa.use_case}</p>
+                      <RichContent
+                        text={qa.use_case}
+                        highlightQuery={highlightQuery}
+                        className="text-sm text-purple-800 dark:text-purple-200 leading-relaxed"
+                      />
                     </div>
                   )}
 
                   {qa.follow_up && (
                     <div className="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-lg p-3">
                       <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">Follow-up Question</p>
-                      <p className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed">{qa.follow_up}</p>
+                      <RichContent
+                        text={qa.follow_up}
+                        highlightQuery={highlightQuery}
+                        className="text-sm text-amber-800 dark:text-amber-200 leading-relaxed"
+                      />
                     </div>
                   )}
                 </div>

@@ -35,6 +35,23 @@ const LEVEL_CONFIGS: LevelConfig[] = [
 
 
 const TOPIC_MODULES: Record<string, string[]> = {
+  javascript: [
+    'What is JavaScript',
+    'Execution Context and Call Stack',
+    'Variables, Scope, and Hoisting',
+    'this Keyword and Binding Rules',
+    'Functions and Closures',
+    'Prototype Chain and Inheritance',
+    'Event Loop and Task Queues',
+    'Promises and Async/Await',
+    'Error Handling Patterns',
+    'Memory Management and Garbage Collection',
+    'DOM Events and Browser APIs',
+    'Modules and Bundling',
+    'Performance Optimization',
+    'Testing JavaScript Applications',
+    'JavaScript Interview Scenarios',
+  ],
   php: [
     'What is PHP',
     'PHP Setup and Environment',
@@ -337,6 +354,28 @@ const TOPIC_MODULES: Record<string, string[]> = {
 // Per-topic module splits by level. Topics listed here override the flat TOPIC_MODULES list.
 // Topics NOT listed here continue to show all modules at every level (existing behaviour).
 const TOPIC_LEVEL_MODULES: Partial<Record<string, Record<Level, string[]>>> = {
+  javascript: {
+    beginner: [
+      'Execution Context and Call Stack',
+      'Variables, Scope, and Hoisting',
+      'this Keyword and Binding Rules',
+      'Functions and Closures',
+      'Event Loop and Task Queues',
+    ],
+    intermediate: [
+      'Prototype Chain and Inheritance',
+      'Promises and Async/Await',
+      'Memory Management and Garbage Collection',
+      'Event Loop and Task Queues',
+      'Functions and Closures',
+    ],
+    advanced: [
+      'Memory Management and Garbage Collection',
+      'Promises and Async/Await',
+      'Prototype Chain and Inheritance',
+      'this Keyword and Binding Rules',
+    ],
+  },
   php: {
     beginner: [
       'What is PHP',
@@ -457,6 +496,43 @@ const TOPIC_LEVEL_MODULES: Partial<Record<string, Record<Level, string[]>>> = {
       'MongoDB Interview Scenarios',
     ],
   },
+  oop: {
+    beginner: [
+      'What is OOP',
+      'Encapsulation',
+      'Inheritance Basics',
+    ],
+    intermediate: [
+      'Polymorphism Basics',
+      'Abstraction Basics',
+      'Composition vs Inheritance',
+      'Inheritance Basics',
+    ],
+    advanced: [
+      'OOP Architecture Trade-offs',
+      'Composition vs Inheritance',
+      'Abstraction Basics',
+    ],
+  },
+  solid: {
+    beginner: [
+      'Single Responsibility Principle',
+      'Open Closed Principle',
+      'Liskov Substitution Principle',
+      'Interface Segregation Principle',
+      'Dependency Inversion Principle',
+    ],
+    intermediate: [
+      'Applying SOLID in Refactoring',
+      'Dependency Inversion Principle',
+      'Open Closed Principle',
+    ],
+    advanced: [
+      'SOLID Trade-offs in Large Systems',
+      'Liskov Substitution Principle',
+      'Single Responsibility Principle',
+    ],
+  },
   vuejs: {
     beginner: [
       'What is Vue.js',
@@ -489,12 +565,15 @@ const TOPIC_LEVEL_MODULES: Partial<Record<string, Record<Level, string[]>>> = {
 };
 
 const topicVsComparisons: Record<string, string> = {
+  javascript: 'JavaScript event-loop concurrency vs thread-based concurrency models',
   php: 'PHP vs Node.js backend approach',
   laravel: 'Laravel convention-driven flow vs custom PHP architecture',
   react: 'React local state vs global state strategy',
   nodejs: 'Node.js event loop model vs multi-thread server models',
   mysql: 'MySQL relational design vs document-first modeling',
   mongodb: 'MongoDB schema flexibility vs strict relational schema',
+  oop: 'OOP composition-first design vs procedural function-first design',
+  solid: 'SOLID-driven extension model vs quick inline conditional growth',
   devops: 'Fast delivery vs release risk control',
   github: 'Fast merge velocity vs strict quality gates',
   agile: 'Agile adaptation vs fixed-plan delivery',
@@ -505,6 +584,144 @@ const topicVsComparisons: Record<string, string> = {
 };
 
 // ─── Per-module code examples ────────────────────────────────────────────────
+
+const JAVASCRIPT_EXAMPLES: Record<string, string> = {
+  'Event Loop and Task Queues': `console.log('1: sync start');
+
+setTimeout(() => console.log('4: timer callback'), 0);
+
+Promise.resolve()
+  .then(() => console.log('3: microtask callback'));
+
+console.log('2: sync end');
+
+// Output: 1, 2, 3, 4
+// Sync stack first -> microtasks -> macrotasks (timers)`,
+  'Functions and Closures': `function createCounter(start = 0) {
+  let count = start; // private variable in closure
+
+  return {
+    increment() {
+      count += 1;
+      return count;
+    },
+    getValue() {
+      return count;
+    },
+    reset() {
+      count = 0;
+    },
+  };
+}
+
+const counter = createCounter(5);
+console.log(counter.increment()); // 6
+console.log(counter.getValue());  // 6`,
+  'Promises and Async/Await': `async function fetchUserProfile(userId: number) {
+  try {
+    const [userRes, ordersRes] = await Promise.all([
+      fetch(\`/api/users/\${userId}\`),
+      fetch(\`/api/orders?user=\${userId}\`),
+    ]);
+
+    if (!userRes.ok || !ordersRes.ok) {
+      throw new Error('Failed to load dashboard data');
+    }
+
+    const [user, orders] = await Promise.all([userRes.json(), ordersRes.json()]);
+    return { user, orders };
+  } catch (error) {
+    console.error('Dashboard load error:', error);
+    return { user: null, orders: [] };
+  }
+}`,
+};
+
+const OOP_EXAMPLES: Record<string, string> = {
+  Encapsulation: `class BankAccount {
+  #balance = 0;
+
+  deposit(amount: number) {
+    if (amount <= 0) throw new Error('Deposit must be positive');
+    this.#balance += amount;
+  }
+
+  withdraw(amount: number) {
+    if (amount > this.#balance) throw new Error('Insufficient balance');
+    this.#balance -= amount;
+  }
+
+  getBalance() {
+    return this.#balance;
+  }
+}`,
+  'Polymorphism Basics': `interface PaymentMethod {
+  charge(amount: number): string;
+}
+
+class CardPayment implements PaymentMethod {
+  charge(amount: number) {
+    return \`Charged INR \${amount} via card\`;
+  }
+}
+
+class UpiPayment implements PaymentMethod {
+  charge(amount: number) {
+    return \`Charged INR \${amount} via UPI\`;
+  }
+}
+
+function checkout(method: PaymentMethod, amount: number) {
+  return method.charge(amount);
+}`,
+};
+
+const SOLID_EXAMPLES: Record<string, string> = {
+  'Single Responsibility Principle': `// BAD: One class handles validation + persistence + notification
+class OrderServiceBad {
+  place(order: any) {
+    if (!order.items?.length) throw new Error('Order is empty');
+    // save to DB
+    // send email
+  }
+}
+
+// GOOD: Responsibilities split
+class OrderValidator {
+  validate(order: any) {
+    if (!order.items?.length) throw new Error('Order is empty');
+  }
+}
+
+class OrderRepository {
+  save(order: any) {
+    // persist order
+  }
+}
+
+class OrderNotifier {
+  sendCreated(order: any) {
+    // email or webhook
+  }
+}`,
+  'Dependency Inversion Principle': `interface PaymentGateway {
+  charge(amount: number): Promise<void>;
+}
+
+class StripeGateway implements PaymentGateway {
+  async charge(amount: number) {
+    console.log('Stripe charged', amount);
+  }
+}
+
+class CheckoutService {
+  constructor(private gateway: PaymentGateway) {}
+
+  async checkout(amount: number) {
+    await this.gateway.charge(amount);
+  }
+}`,
+};
 
 const PHP_EXAMPLES: Record<string, string> = {
   'What is PHP': `<?php
@@ -6168,6 +6385,65 @@ export function ${moduleName.replace(/[^a-zA-Z0-9]/g, '')}Example() {
       <p>You typed: {value || '(empty)'}</p>
     </div>
   );
+}`;
+  }
+
+  if (topicId === 'javascript') {
+    return JAVASCRIPT_EXAMPLES[moduleName] ?? `// ${moduleName}
+// JavaScript runtime behavior demo
+
+function run${moduleName.replace(/[^a-zA-Z0-9]/g, '')}Demo() {
+  const startedAt = Date.now();
+
+  setTimeout(() => {
+    console.log('Timer callback after', Date.now() - startedAt, 'ms');
+  }, 0);
+
+  Promise.resolve().then(() => {
+    console.log('Microtask callback');
+  });
+
+  console.log('Synchronous section completed');
+}
+
+run${moduleName.replace(/[^a-zA-Z0-9]/g, '')}Demo();`;
+  }
+
+  if (topicId === 'oop') {
+    return OOP_EXAMPLES[moduleName] ?? `class ${moduleName.replace(/[^a-zA-Z0-9]/g, '')}Service {
+  execute(input: unknown) {
+    if (input == null) {
+      throw new Error('Input is required');
+    }
+
+    return { status: 'ok', input };
+  }
+}
+
+const service = new ${moduleName.replace(/[^a-zA-Z0-9]/g, '')}Service();
+console.log(service.execute({ id: 1 }));`;
+  }
+
+  if (topicId === 'solid') {
+    return SOLID_EXAMPLES[moduleName] ?? `// ${moduleName}
+// Compare concrete dependency vs abstraction dependency
+
+interface Logger {
+  info(message: string): void;
+}
+
+class ConsoleLogger implements Logger {
+  info(message: string) {
+    console.log('[info]', message);
+  }
+}
+
+class FeatureService {
+  constructor(private logger: Logger) {}
+
+  run() {
+    this.logger.info('Feature executed');
+  }
 }`;
   }
 

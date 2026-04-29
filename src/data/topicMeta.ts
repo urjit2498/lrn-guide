@@ -14,6 +14,16 @@ export interface TopicMeta {
 
 export const TOPIC_META: TopicMeta[] = [
   {
+    id: 'javascript',
+    name: 'JavaScript',
+    icon: '🟨',
+    color: 'bg-yellow-100 dark:bg-yellow-900/30',
+    textColor: 'text-yellow-700 dark:text-yellow-300',
+    borderColor: 'border-yellow-300 dark:border-yellow-700',
+    description:
+      'JavaScript roadmap from fundamentals to engine-level behavior, async patterns, and interview-grade problem solving.',
+  },
+  {
     id: 'php',
     name: 'PHP',
     icon: '🐘',
@@ -102,6 +112,26 @@ export const TOPIC_META: TopicMeta[] = [
     borderColor: 'border-orange-300 dark:border-orange-700',
     description:
       'Agile methodology path covering Scrum, Kanban, planning, and interview-ready process understanding.',
+  },
+  {
+    id: 'oop',
+    name: 'OOP',
+    icon: '🧱',
+    color: 'bg-violet-100 dark:bg-violet-900/30',
+    textColor: 'text-violet-700 dark:text-violet-300',
+    borderColor: 'border-violet-300 dark:border-violet-700',
+    description:
+      'Object-oriented programming track covering encapsulation, inheritance, polymorphism, abstraction, and design trade-offs.',
+  },
+  {
+    id: 'solid',
+    name: 'SOLID Principles',
+    icon: '📐',
+    color: 'bg-teal-100 dark:bg-teal-900/30',
+    textColor: 'text-teal-700 dark:text-teal-300',
+    borderColor: 'border-teal-300 dark:border-teal-700',
+    description:
+      'SOLID learning path with practical refactoring patterns, architecture decisions, and interview-ready examples.',
   },
   {
     id: 'vuejs',

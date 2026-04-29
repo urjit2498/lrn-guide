@@ -1,4 +1,5 @@
 import type { SpecificSectionData } from './php';
+import { JS_OOP_SOLID_CONTENT } from './js-oop-solid';
 
 const react: Record<string, SpecificSectionData> = {
   'What is React': {
@@ -382,6 +383,534 @@ const laravel: Record<string, SpecificSectionData> = {
       },
     ],
   },
+
+  // ─── INTERMEDIATE ─────────────────────────────────────────────────────────
+
+  'Eloquent Relationships and N+1 Problem': {
+    explanation:
+      'Eloquent relationships are methods on your model that return a relationship object — `hasOne`, `hasMany`, `belongsTo`, `belongsToMany`, `hasManyThrough`, `morphMany`. By default every relationship is lazy-loaded: accessing `$post->author` executes a new SQL query each time. Inside a loop over 100 posts, this generates 101 queries (1 for posts + 100 for authors). Eager loading with `with("author")` collapses this to exactly 2 queries regardless of post count. `withCount("comments")` adds a comments_count column via a subquery without loading comment records. `withSum("items", "price")` aggregates without hydrating all items.',
+    realWorldExample:
+      'A SaaS dashboard lists 50 companies with their active plan name, owner email, and user count. Without optimization: `Company::all()` + `$company->plan->name`, `$company->owner->email`, `$company->users->count()` inside the loop = 151 queries. Optimized: `Company::with(["plan:id,name", "owner:id,email"])->withCount("users")->get()` = 4 queries total, regardless of how many companies exist. `with("plan:id,name")` selects only two columns from the plans table — no unnecessary data transfer.',
+    practicalUseCase:
+      'Install `barryvdh/laravel-debugbar` in development. Load any page that shows a list with related data. Count the queries in the Debugbar panel. Add `with()` and `withCount()` until the query count stops growing with more records. Verify with `DB::getQueryLog()` in Tinker: `DB::enableQueryLog(); Post::with("author")->get(); dd(DB::getQueryLog());`',
+    keyPoints: [
+      '`Post::with("author")->get()` runs 2 queries: SELECT posts; SELECT users WHERE id IN (1,2,3...). Never N+1.',
+      '`withCount("comments")` adds `comments_count` to each model without loading comment objects — use this for list pages showing counts.',
+      '`with("author:id,name")` eager-loads only the id and name columns — prevents fetching full author rows when you only display the name.',
+      '`loadMissing("author")` on an already-fetched collection only queries if the relation is not loaded — safe to call conditionally in services.',
+      '`$with = ["author"]` on the model always eager-loads that relation — useful for models where you never display them without the relation.',
+      'Nested eager loading: `Post::with("author.profile", "comments.user")->get()` loads posts, their authors, each author\'s profile, all comments, and each comment\'s user in 5 queries.',
+      '`belongsToMany` pivot data: add `->withPivot("quantity")` and `->withTimestamps()` to read pivot columns directly on the related model.',
+    ],
+    interviewQA: [
+      {
+        question: 'A page showing 100 products and their category names fires 101 queries. Walk me through how you identify and fix this.',
+        answer:
+          'Identify: install Debugbar or add `DB::listen(fn($q) => logger($q->sql))` — you\'ll see 1 SELECT for products and 100 identical SELECTs for categories. Fix: change `Product::all()` to `Product::with("category")->get()`. This replaces the 100 individual category queries with one `SELECT * FROM categories WHERE id IN (1,3,5...)` batch query. Verify the fix by checking Debugbar drops from 101 to 2 queries. Further optimize with column selection: `with("category:id,name")` if you only display the name.',
+        follow_up: 'What is the difference between `with()` at query time and `load()` on a collection?',
+      },
+      {
+        question: 'What is the difference between `hasMany` and `belongsToMany` in Eloquent?',
+        answer:
+          '`hasMany` is a one-to-many relationship — a User has many Posts. Posts table has a `user_id` foreign key. No pivot table needed. `belongsToMany` is many-to-many — a Post belongs to many Tags, and a Tag belongs to many Posts. Requires a `post_tag` pivot table with `post_id` and `tag_id` columns. Access pivot data with `$post->tags->first()->pivot->created_at`. Add extra pivot columns using `->withPivot("approved")`. The pivot table itself can become a full model by extending `Pivot` — useful when pivot rows have their own lifecycle (e.g., a `role_user` table where the assignment has a `granted_at` and `granted_by`).',
+        follow_up: 'When would you create a Pivot model instead of using the default pivot functionality?',
+      },
+      {
+        question: 'What does `hasManyThrough` do and when do you use it?',
+        answer:
+          '`hasManyThrough` shortcuts a two-hop relationship. Example: Country `hasManyThrough` Post `through` User. The Post table has `user_id`; User table has `country_id`. Without `hasManyThrough` you\'d do: `$country->users->flatMap->posts`. With it: `$country->posts()` returns all posts written by users from that country in a single JOIN query. The signature: `hasManyThrough(Post::class, User::class, "country_id", "user_id")`. Use it when you need data two models away and want to avoid loading the intermediate model into memory.',
+        follow_up: 'How would you count posts per country efficiently using `hasManyThrough` and `withCount`?',
+      },
+    ],
+  },
+
+  'Migrations and Seeders': {
+    explanation:
+      'Migrations are version-controlled database schema changes. Each migration file has an `up()` method (apply the change) and a `down()` method (reverse it). Laravel tracks which migrations have run in the `migrations` table. `php artisan migrate` runs all pending migrations in order. `php artisan migrate:rollback` reverses the last batch. Schema changes should never be made directly in the database — always via migrations so every environment (local, staging, production) has the same schema. Seeders populate the database with test or default data — factories generate fake model instances using Faker.',
+    realWorldExample:
+      'Adding a `subscription_tier` column to `users` in production: create a migration with `$table->string("subscription_tier")->default("free")->after("email")`, run `php artisan migrate` during deployment. The default value means existing rows are updated instantly without an UPDATE statement. Rolling back is `php artisan migrate:rollback` — the `down()` method drops the column. A bad practice: modifying an existing migration that has already run in production — it breaks the `migrations` table checksum and creates schema drift.',
+    practicalUseCase:
+      'Create a migration: `php artisan make:migration add_stripe_customer_id_to_users_table`. Add `$table->string("stripe_customer_id")->nullable()->unique()`. Run `php artisan migrate:fresh --seed` in local to rebuild and re-seed. Create a factory: `php artisan make:factory OrderFactory`. Use `Order::factory()->count(50)->for(User::factory())->create()` in Tinker to generate realistic test data with related users.',
+    keyPoints: [
+      'Migration batches: migrations in the same `migrate` call share a batch number. `rollback` reverses the last batch (all migrations in that run).',
+      '`nullable()` vs `->default("value")`: nullable allows NULL in the DB; default fills the column for new inserts but does not update existing rows.',
+      '`->after("email")` controls column position in MySQL — has no effect in PostgreSQL (columns are always added at the end).',
+      'Foreign key constraints: `$table->foreignId("user_id")->constrained()->cascadeOnDelete()` creates the FK and adds CASCADE DELETE automatically.',
+      'Model factories use Faker: `"email" => fake()->unique()->safeEmail()`. `unique()` prevents duplicate emails in the same factory run.',
+      '`RefreshDatabase` trait in tests uses `migrate:fresh` once then wraps each test in a transaction — fast and isolated.',
+      '`php artisan migrate --pretend` shows the SQL that would run without executing it — useful for auditing production changes.',
+    ],
+    interviewQA: [
+      {
+        question: 'How do you safely add a NOT NULL column to a large production table without downtime?',
+        answer:
+          'Directly adding a NOT NULL column without a default to a table with millions of rows locks the table while MySQL updates every row. Safe approach: (1) Add the column as nullable: `$table->string("tier")->nullable()`. Deploy. (2) Write a job that backfills the column in chunks: `User::whereNull("tier")->chunkById(500, fn($users) => $users->each->update(["tier" => "free"]))`. Run this after deployment. (3) Create a second migration that makes it NOT NULL with a default once all rows are backfilled. This keeps the table available throughout. Alternatively, tools like gh-ost (GitHub Online Schema Transposing) shadow the table change without locks.',
+        follow_up: 'How do you handle schema changes that must be backward-compatible during a rolling deployment?',
+      },
+      {
+        question: 'What is the difference between `migrate:fresh` and `migrate:reset`?',
+        answer:
+          '`migrate:reset` calls the `down()` method of every migration in reverse order — it rolls back each one individually. If any `down()` method has a bug or the migration file is missing, it fails. `migrate:fresh` drops every table directly using `SHOW TABLES` + `DROP TABLE` and then re-runs all migrations from scratch — it does not call `down()` at all. `migrate:fresh` is faster and avoids broken rollback methods. Use `migrate:fresh --seed` in local/CI to get a clean known state. Never run `migrate:fresh` in production — it destroys all data.',
+        follow_up: 'Why might a `down()` method be impossible to write for certain migrations?',
+      },
+    ],
+  },
+
+  'Authentication in Laravel': {
+    explanation:
+      'Laravel ships authentication as a first-class feature. For web apps, `Laravel Breeze` scaffolds session-based auth (login, register, password reset, email verification) using Blade or Inertia. For APIs, `Laravel Sanctum` issues opaque tokens stored in `personal_access_tokens` (for mobile/third-party clients) or uses encrypted session cookies (for SPAs on the same domain). `Laravel Passport` implements a full OAuth2 server for third-party integrations. The `auth` middleware redirects unauthenticated web requests; `auth:sanctum` returns a 401 JSON response for API requests. `Auth::user()` or `$request->user()` returns the authenticated model anywhere in the request lifecycle.',
+    realWorldExample:
+      'A mobile app authenticates: POST `/api/login` → `Auth::attempt()` verifies credentials → `$user->createToken("mobile", ["read:orders"])` issues a token with specific abilities → returns the plain-text token once. Every subsequent request sends `Authorization: Bearer {token}`. The `auth:sanctum` middleware resolves the token from `personal_access_tokens`, loads the user, and calls `$request->user()->tokenCan("read:orders")` to gate specific actions. Revoking a device: `$user->tokens()->where("name", "mobile")->delete()`.',
+    practicalUseCase:
+      'Install Sanctum, create a login endpoint that returns a token, protect a route with `auth:sanctum`, test with Postman. Add token abilities: issue a token with `["read:orders"]`, try to POST to an orders endpoint and verify you get 403. Issue a token with `["write:orders"]` and verify it succeeds.',
+    keyPoints: [
+      'Sanctum token vs SPA cookie: token for mobile/APIs (sent in Authorization header), cookie for SPAs on the same domain (httpOnly, not accessible to JS).',
+      '`Auth::attempt(["email" => $email, "password" => $password])` checks credentials and starts a session — returns true/false.',
+      'Token abilities (scopes): `$user->createToken("name", ["read:orders"])`. Check with `$request->user()->tokenCan("read:orders")` — returns true/false.',
+      'Logout on API: `$request->user()->currentAccessToken()->delete()` revokes only the current token. `$user->tokens()->delete()` revokes all tokens (use for "logout all devices").',
+      '`auth()->user()` and `$request->user()` are identical — both resolve from the current guard. Use `$request->user()` in controllers (explicit).',
+      'Breeze vs Jetstream: Breeze is minimal (email/password only, Blade); Jetstream adds two-factor auth, API tokens, and team management.',
+      'Email verification: `MustVerifyEmail` interface on the User model + `verified` middleware on routes that require a confirmed email.',
+    ],
+    interviewQA: [
+      {
+        question: 'What is the difference between Laravel Sanctum and Laravel Passport?',
+        answer:
+          'Sanctum is lightweight — it issues opaque tokens or uses session cookies. No OAuth server, no JWT, no complex grant types. Perfect for first-party SPAs and mobile apps that your own team controls. Passport implements a full OAuth2 authorization server: authorization codes, client credentials, password grants, and personal access tokens. Use Passport when third-party developers need to authenticate on behalf of your users (like GitHub\'s OAuth app login). Sanctum is the right default for 90% of Laravel apps. Passport adds significant complexity that is only justified for public API platforms.',
+        follow_up: 'Why is storing a Sanctum token in localStorage a security risk, and what is the safer alternative?',
+      },
+      {
+        question: 'How does the `auth:sanctum` middleware decide whether to use token or session authentication?',
+        answer:
+          'Sanctum\'s `EnsureFrontendRequestsAreStateful` middleware checks if the request origin matches `SANCTUM_STATEFUL_DOMAINS`. If it does and a session cookie is present, Sanctum uses session-based auth — the request is treated as a first-party SPA. If the origin is not stateful or no session cookie exists, Sanctum looks for `Authorization: Bearer {token}` in the header, hashes it with SHA-256, and queries `personal_access_tokens` for a match. This dual-mode detection is automatic — the same `auth:sanctum` middleware serves both SPAs and mobile API clients without configuration changes per request.',
+        follow_up: 'How does Sanctum handle CSRF protection for SPA cookie-based authentication?',
+      },
+    ],
+  },
+
+  'Authorization with Gates and Policies': {
+    explanation:
+      'Authentication answers "who are you?" Authorization answers "what are you allowed to do?" Laravel provides two tools. Gates are closures registered in `AppServiceProvider::boot()` for simple, global checks: `Gate::define("delete-post", fn(User $user, Post $post) => $user->id === $post->user_id)`. Policies are classes that group authorization logic for a specific model: `php artisan make:policy PostPolicy --model=Post`. Each method (view, create, update, delete) returns a boolean. The `can()` middleware on routes, `$request->user()->can("update", $post)` in controllers, and `@can("update", $post)` in Blade all resolve to the same Policy or Gate.',
+    realWorldExample:
+      'A multi-role CMS: `PostPolicy::update()` returns true if the user is the post author OR has the "editor" role. `PostPolicy::delete()` returns true only for the author or an admin. In the controller: `$this->authorize("update", $post)` — if the policy returns false, Laravel automatically returns a 403 response. No manual `if (!$user->can(...)) abort(403)` needed. In Blade: `@can("delete", $post) <button>Delete</button> @endcan` — the delete button only appears for authorized users.',
+    practicalUseCase:
+      'Generate `PostPolicy`, implement `update()` and `delete()` methods, register it in `AuthServiceProvider::$policies`, then call `$this->authorize("update", $post)` in the controller. Write a feature test: create a post owned by user A, authenticate as user B, call PATCH `/posts/{id}` and assert 403. Authenticate as user A and assert 200.',
+    keyPoints: [
+      '`Gate::define("admin-only", fn(User $u) => $u->role === "admin")` — check with `Gate::allows("admin-only")` or `@can("admin-only")` in Blade.',
+      'Policy registration: `AuthServiceProvider::$policies = [Post::class => PostPolicy::class]`. Laravel auto-discovers policies in `app/Policies/` in Laravel 10+.',
+      '`before()` method in a Policy runs first: `if ($user->isAdmin()) return true` — admins bypass all other policy checks.',
+      'Policy responses: return `Response::deny("Only the author can delete posts.")` instead of `false` for custom error messages.',
+      '`authorize()` in controllers throws `AuthorizationException` (HTTP 403) automatically — no try/catch needed.',
+      '`can` middleware: `Route::put("/posts/{post}", ...)->middleware("can:update,post")` — checks the policy before the controller even runs.',
+      'Super-admin pattern: override `Gate::before(fn(User $u) => $u->isSuperAdmin() ? true : null)` — `null` means "defer to the regular gate/policy".',
+    ],
+    interviewQA: [
+      {
+        question: 'What is the difference between a Gate and a Policy in Laravel?',
+        answer:
+          'Gates are closures for simple, ad-hoc authorization checks not tied to a specific model — e.g., `Gate::define("view-analytics", fn($user) => $user->isPremium())`. Policies are classes that group authorization logic for one Eloquent model — all authorization decisions about `Post` (view, create, update, delete, restore) live in `PostPolicy`. The distinction is organization: Gates for feature-level checks, Policies for resource-level CRUD authorization. Under the hood, `$user->can("update", $post)` checks if a Policy is registered for `Post::class` first; if not, it falls through to a matching Gate definition.',
+        follow_up: 'How do you write a policy method that authorizes a guest (unauthenticated) user to view published posts?',
+      },
+      {
+        question: 'How would you implement role-based access control in Laravel without a package?',
+        answer:
+          'Add a `role` column to the `users` table (enum: "admin", "editor", "viewer"). Add a `role()` helper on the User model. In Policies, check `$user->role === "admin"` or `in_array($user->role, ["admin", "editor"])`. For more granularity, create a `roles` + `permissions` + `role_user` + `role_permission` many-to-many structure, add a `hasPermission(string $perm): bool` method to User that checks the relationship, and use it in Gate definitions. For most apps, a simple `role` string column is sufficient. Reach for `spatie/laravel-permission` when you need runtime role/permission management, multiple guards, or permission caching.',
+        follow_up: 'How does `spatie/laravel-permission` cache permissions and what invalidates the cache?',
+      },
+    ],
+  },
+
+  'Middleware and Request Pipelines': {
+    explanation:
+      'Every HTTP request in Laravel passes through a pipeline of middleware before reaching the controller and a return pipeline on the way out. Middleware is a class with a `handle(Request $request, Closure $next): Response` method. Calling `$next($request)` passes control to the next middleware in the chain. Code before `$next()` runs on the way in (before the controller); code after `$next()` runs on the way out (after the controller responds). Global middleware runs on every request. Route middleware is assigned to specific routes or groups. The middleware pipeline is defined in `app/Http/Kernel.php`.',
+    realWorldExample:
+      'Request lifecycle for `POST /api/orders` with `auth:sanctum` and `throttle:60,1` middleware: (1) `TrustProxies` normalizes the IP from load balancer headers. (2) `ValidatePostSize` rejects oversized payloads. (3) `StartSession` initializes the session. (4) `auth:sanctum` resolves the Bearer token, loads the user — if invalid, returns 401 immediately. (5) `throttle:60,1` checks Redis for this user\'s request count — if exceeded, returns 429. (6) The request reaches the controller. (7) On the return trip, `SetCacheHeaders` adds cache control headers. Each middleware is a checkpoint that can short-circuit the pipeline.',
+    practicalUseCase:
+      'Create a `EnsureUserIsSubscribed` middleware: check `$request->user()->subscribed()`, if not subscribed return a JSON 402 response. Register it in `Kernel.php` as `"subscribed"`. Apply it to a route group. Write a test: authenticated but unsubscribed user hits the route and gets 402; subscribed user gets through.',
+    keyPoints: [
+      'Before middleware: code BEFORE `return $next($request)` — runs before the controller. After middleware: code AFTER — runs after the controller returns a response.',
+      'Terminable middleware: implement `terminate(Request $request, Response $response)` — runs after the response is sent to the browser (for logging, cleanup).',
+      '`Kernel::$middlewarePriority` defines execution order when the same middleware is listed in multiple groups — important for auth before CSRF.',
+      '`throttle:60,1` uses Redis by default — 60 requests per 1 minute per user. Custom throttle: extend `ThrottleRequests` and override `resolveRequestSignature()`.',
+      'Middleware groups: `"web"` (sessions, CSRF, cookies) and `"api"` (stateless, throttle) are pre-configured. Apply groups to route files.',
+      '`php artisan route:list --path=api` shows every route with its middleware chain — useful for auditing which routes lack auth.',
+      'Middleware parameters: `handle($request, $next, $role)` — called as `->middleware("role:admin")` on a route.',
+    ],
+    interviewQA: [
+      {
+        question: 'What is the difference between before middleware and after middleware in Laravel?',
+        answer:
+          'Before middleware executes code before passing the request to the next layer: `public function handle($request, $next) { // BEFORE CODE; return $next($request); }`. The code before `$next()` runs first — used for authentication checks, rate limiting, request transformation. After middleware executes code after the controller has responded: `$response = $next($request); // AFTER CODE; return $response;`. Used for adding response headers, logging response data, or transforming the output. A middleware can do both: validate the request coming in, then modify the response going out.',
+        follow_up: 'What is a terminable middleware and when would you use it over after middleware?',
+      },
+      {
+        question: 'How does Laravel\'s throttle middleware work internally with Redis?',
+        answer:
+          'The `throttle:60,1` middleware resolves a cache key from the authenticated user ID or client IP. Each request increments a Redis counter for that key with a 60-second TTL. If the counter exceeds 60, the middleware returns a 429 response with `Retry-After` and `X-RateLimit-*` headers. Redis\'s atomic INCR command prevents race conditions where two simultaneous requests might both read 59 and both think they\'re under the limit. The key resets after 60 seconds (the TTL). Custom signatures: extend `ThrottleRequests` and override `resolveRequestSignature()` to rate-limit by API key, tenant ID, or endpoint-specific logic.',
+        follow_up: 'How would you implement different rate limits for free and premium API users?',
+      },
+    ],
+  },
+
+  'API Resources and Response Formatting': {
+    explanation:
+      'API Resources are transformation classes that control exactly what JSON is returned for an Eloquent model. Without them, `return $user` serializes every column including `password` and internal timestamps. With `UserResource`, you explicitly map model attributes to JSON keys: rename fields, format dates, conditionally include fields, and nest related resources. `JsonResource::toArray()` is called per model; `ResourceCollection` wraps a paginated result with metadata. The `when()` and `whenLoaded()` helpers conditionally include data without checking if relations are loaded manually.',
+    realWorldExample:
+      'A mobile API returns order data. `OrderResource` formats `created_at` as ISO8601, renames `net_total` to `amount`, conditionally includes `payment_method` only for admin tokens (`$this->when($request->user()->tokenCan("admin"), fn() => $this->payment_method)`), and nests `CustomerResource` and `ItemResource` collection. When the frontend team changes their expected field name from `amount` to `total_price`, you change one line in `OrderResource` — the controller is untouched.',
+    practicalUseCase:
+      'Create `OrderResource` that: renames `created_at` to `date`, formats price as a string with 2 decimals, includes items only when loaded (`whenLoaded("items", fn() => ItemResource::collection($this->items))`), and adds a computed `is_paid` boolean. Return `OrderResource::collection(Order::with("items")->paginate(25))` from the controller and inspect the JSON structure.',
+    keyPoints: [
+      '`return new UserResource($user)` wraps a single model. `return UserResource::collection($users)` wraps a collection — paginated collections include `links` and `meta` automatically.',
+      '`$this->when($condition, $value)` — field is included in JSON only when condition is true. Returns `null` and omits the key when false.',
+      '`$this->whenLoaded("orders", fn() => OrderResource::collection($this->orders))` — includes the relation only if it was already eager-loaded. Prevents accidental N+1 from the resource layer.',
+      'Wrap all resources in a `data` key: `JsonResource::withoutWrapping()` removes the wrapping globally — useful for APIs that expect flat responses.',
+      '`additional(["meta" => [...]])` chains extra data onto the response without modifying `toArray()`.',
+      'Nested resources: return `new AddressResource($this->address)` inside `UserResource::toArray()` — resources compose naturally.',
+      'Custom response codes: return `(new OrderResource($order))->response()->setStatusCode(201)` from the store() controller method.',
+    ],
+    interviewQA: [
+      {
+        question: 'Why should you use API Resources instead of returning Eloquent models directly?',
+        answer:
+          'Returning `return $user` serializes every attribute including `password`, `remember_token`, `two_factor_secret`, and any column that should never leave the server. Even with `$hidden`, you\'re relying on a model-level config rather than an explicit transformation. API Resources: (1) Explicitly whitelist what is returned — security by default. (2) Decouple your database schema from your API contract — rename a column without breaking the API. (3) Format data at the API layer (ISO8601 dates, currency strings, camelCase keys). (4) Conditionally include sensitive data based on token abilities or user role. (5) Nest related resources cleanly without manual `toArray()` calls.',
+        follow_up: 'How do you add pagination metadata to an API Resource collection response?',
+      },
+      {
+        question: 'What is `whenLoaded()` and why is it important for API Resource performance?',
+        answer:
+          '`whenLoaded("orders")` checks if the `orders` relationship is already in the model\'s loaded relations. If it is, it returns the resource collection. If not, it returns nothing (the key is omitted). This is critical because without it, accessing `$this->orders` inside a Resource triggers a new query per model — the resource layer itself introduces N+1 queries. By using `whenLoaded()`, the Resource never triggers lazy loading. The controller decides whether to load the relation with `with("orders")`, and the Resource respects that decision. This keeps performance optimization in the controller where it belongs.',
+        follow_up: 'How would you return orders with items only for admin users in a resource?',
+      },
+    ],
+  },
+
+  'Service Container and Dependency Injection': {
+    explanation:
+      'Laravel\'s Service Container is a PHP IoC container that uses reflection to read constructor type-hints and automatically build the dependency tree. When `OrderController` type-hints `PaymentGateway`, Laravel instantiates `PaymentGateway` (and recursively resolves its own dependencies), injects it into the controller, and never requires you to call `new`. Bindings in `AppServiceProvider::register()` tell the container how to build abstract types: `app()->bind(PaymentGatewayInterface::class, StripeGateway::class)`. In tests you rebind: `app()->bind(PaymentGatewayInterface::class, FakeGateway::class)` — the controller code is never changed.',
+    realWorldExample:
+      'An e-commerce app has `StripeGateway` in production and `FakeGateway` in tests. `OrderController` type-hints `PaymentGatewayInterface`. `AppServiceProvider::register()` binds `StripeGateway` in production. A test calls `app()->bind(PaymentGatewayInterface::class, FakeGateway::class)` before the request — the controller receives `FakeGateway` automatically. No mock framework needed for the swap, no static method to patch. The container does the wiring. Changing from Stripe to Braintree means updating one binding — zero controller changes.',
+    practicalUseCase:
+      'Create `PaymentGatewayInterface` with a `charge(int $amountCents, string $token): ChargeResult` method. Implement `StripeGateway`. Bind it in `AppServiceProvider`. Inject into `CheckoutController`. Write a test that binds `FakeGateway` and asserts the controller returns 201 without hitting Stripe\'s API.',
+    keyPoints: [
+      '`app()->bind(Interface::class, Impl::class)` — new instance every time resolved. `app()->singleton(...)` — one instance per request lifecycle, reused.',
+      '`app()->instance(Interface::class, $existingObject)` — use an already-created object as the binding (useful for testing with pre-configured mocks).',
+      'Contextual binding: `$this->app->when(OrderController::class)->needs(PaymentGateway::class)->give(StripeGateway::class)` — different classes get different implementations.',
+      'Auto-resolution: classes without explicit bindings are resolved via PHP Reflection — the container reads the constructor and builds dependencies recursively.',
+      'Facades like `Cache::`, `DB::`, `Queue::` resolve a service from the container each call — `Cache::get("key")` = `app("cache")->get("key")`.',
+      'Tagged bindings: `app()->tag([DriverA::class, DriverB::class], "exporters")` then `app()->tagged("exporters")` returns all — useful for plugin/strategy patterns.',
+      '`app()->make(Foo::class)` manually resolves outside of constructor injection — use in closures, commands, or non-injectable contexts.',
+    ],
+    interviewQA: [
+      {
+        question: 'Why is constructor injection through the Service Container better than using `new ClassName()` inside methods?',
+        answer:
+          'With `new ClassName()` inside a method, the class is hardcoded — you cannot swap it for a fake in tests, a different implementation in staging, or mock it for unit testing. You must modify the class to change its behavior. With constructor injection: (1) The dependency is explicit and visible in the class signature. (2) The container handles instantiation — including the dependency\'s own dependencies recursively. (3) Tests rebind the interface to a fake without touching the class. (4) You can switch implementations by changing one line in `AppServiceProvider`. This is the Dependency Inversion Principle in practice: depend on abstractions, not concrete classes.',
+        follow_up: 'How do you inject different implementations of the same interface into two different controllers using contextual binding?',
+      },
+      {
+        question: 'What is the difference between `app()->bind()`, `app()->singleton()`, and `app()->instance()` in Laravel?',
+        answer:
+          '`bind()` registers a factory closure — every time the binding is resolved, the closure runs and returns a new instance. Use for stateless services. `singleton()` runs the closure once and stores the result — subsequent resolutions return the same object within the request lifecycle. Use for stateful services (HTTP clients, database managers, cache managers) where you want one shared instance. `instance()` registers a specific pre-created object as the binding — bypasses the factory entirely. Most useful in tests: `app()->instance(Mailer::class, $mockMailer)` registers your mock directly, ensuring the container returns it without calling any factory.',
+        follow_up: 'When would using a singleton create a bug in a long-running Laravel Octane or Laravel Horizon worker?',
+      },
+    ],
+  },
+
+  'Laravel Collections API': {
+    explanation:
+      'Laravel Collections wrap PHP arrays in a fluent, chainable API with 100+ methods for transforming, filtering, grouping, and aggregating data in memory. `collect([1,2,3])` wraps an array; `Model::all()` returns a Collection automatically. Collections are lazy-evaluated in chains — `filter()`, `map()`, and `reject()` run on the full collection in memory. For truly large datasets, `LazyCollection` uses PHP Generators: `LazyCollection::make(fn() => yield from User::cursor())` processes millions of rows one at a time without loading them all into memory.',
+    realWorldExample:
+      'Processing an order report: `Order::with("items")->get()->groupBy("status")->map(fn($group) => ["count" => $group->count(), "total" => $group->sum("total"), "avg" => $group->avg("total")])->sortByDesc("total")`. This groups orders by status, computes count/sum/average per group, and sorts in one fluent chain — no foreach, no manual accumulator variables. In PHP without Collections this would be 20+ lines with nested loops.',
+    practicalUseCase:
+      'Fetch all users, group them by their subscription plan, for each group collect the top 5 by total spend, flatten to a single list, and format each user as `["name" => ..., "plan" => ..., "rank" => ...]`. Implement this using `groupBy()`, `map()`, `sortByDesc()`, `take()`, `flatten()`, and `mapWithKeys()` — all chained on a single Collection.',
+    keyPoints: [
+      '`filter()` keeps elements where callback returns true. `reject()` is the inverse — keeps where callback returns false.',
+      '`map()` transforms each element. `flatMap()` maps and flattens one level — useful when each element produces an array of results.',
+      '`groupBy("status")` returns a Collection of Collections keyed by the status value — nest `->map()` to aggregate each group.',
+      '`pluck("email")` extracts one column. `pluck("name", "id")` creates a key-value Collection — fast lookup table from a query result.',
+      '`first(fn($u) => $u->role === "admin")` returns the first matching element without loading all elements first.',
+      'Lazy collections: `User::cursor()` + `LazyCollection::make()` — process 1M users with constant memory by yielding one at a time.',
+      '`collect()->pipe(fn($c) => ...)` passes the collection to a closure and returns the result — useful for breaking very long chains into named steps.',
+    ],
+    interviewQA: [
+      {
+        question: 'What is the difference between `map()` and `transform()` in Laravel Collections?',
+        answer:
+          '`map()` returns a new Collection with the transformed values — the original Collection is unchanged (immutable). `transform()` modifies the Collection in-place and returns the same Collection instance (mutable). In practice, always use `map()` — mutable collections are a footgun in code where the same collection is referenced in multiple places. The one case for `transform()`: when you are intentionally replacing a large collection in-place to avoid the memory cost of creating a second copy — but this is rare and `map()` is safe by default.',
+        follow_up: 'When would you use `LazyCollection` over a regular `Collection` for processing Eloquent results?',
+      },
+      {
+        question: 'How would you implement pagination on an in-memory Collection?',
+        answer:
+          'Use `forPage($pageNumber, $perPage)`: `$paginated = $collection->forPage(2, 15)` returns items 16–30. This is manual pagination — you must separately track the total. For a full paginator object that generates `links()`, use `new LengthAwarePaginator($paginated, $collection->count(), 15, $pageNumber)`. In practice, prefer database-level pagination with `Model::paginate(15)` — it adds LIMIT/OFFSET in SQL and only loads one page of records. In-memory pagination is justified only when you\'ve already loaded data for other purposes (e.g., filtering a static config array) or when the dataset is too small to warrant a DB query.',
+        follow_up: 'What is the performance difference between `Collection::filter()` and adding a WHERE clause to the Eloquent query?',
+      },
+    ],
+  },
+
+  // ─── ADVANCED ─────────────────────────────────────────────────────────────
+
+  'Service Providers and Bootstrapping': {
+    explanation:
+      'Service Providers are the central bootstrapping mechanism in Laravel. The framework itself is entirely bootstrapped through providers — `RouteServiceProvider` registers routes, `AuthServiceProvider` registers gates and policies, `EventServiceProvider` maps events to listeners. Your application\'s providers run after the framework\'s. The lifecycle is two-pass: first all `register()` methods across all providers (container bindings only — no cross-service calls), then all `boot()` methods (full framework access). Deferred providers (implementing `DeferrableProvider`) are not loaded at all until one of their declared services is actually resolved — this reduces bootstrap time for large applications.',
+    realWorldExample:
+      'A multi-tenant SaaS registers a `TenantServiceProvider`. `register()` binds `TenantManager` as a singleton. `boot()` adds a route macro, registers a Blade directive `@tenant`, hooks into the `Eloquent::creating` event to automatically set `tenant_id`, and registers a global query scope that filters all models by the current tenant. The entire multi-tenancy infrastructure is encapsulated in one provider — install it, register it in `config/app.php`, and every model automatically scopes to the current tenant.',
+    practicalUseCase:
+      'Write a `CurrencyServiceProvider` that registers a `CurrencyConverter` singleton (reads exchange rates from config), adds a Blade directive `@currency($amount, $code)` that formats money, and publishes its config via `$this->publishes([...])`. Register it in `config/app.php` and verify `@currency(1234.56, "EUR")` renders "€1,234.56" in Blade.',
+    keyPoints: [
+      '`register()`: ONLY container bindings. No config(), view(), auth(), event() calls — other providers may not be registered yet.',
+      '`boot()`: full framework access. Register Blade directives, view composers, route macros, model observers, validators, event listeners here.',
+      'Deferred providers: implement `DeferrableProvider` and return service names from `provides()` — the provider is not loaded until those services are resolved.',
+      '`$this->mergeConfigFrom(__DIR__."/../config/pkg.php", "pkg")` — package default config merged with app\'s published config.',
+      '`$this->publishes([...], "tag")` enables `php artisan vendor:publish --tag=tag` to copy config, migrations, and views into the app.',
+      'Order in `config/app.php` providers array matters — providers boot in listed order. Dependencies must be earlier in the list.',
+      '`app()->resolving(Foo::class, fn($foo, $app) => $foo->setup())` — callback fires every time Foo is resolved from the container.',
+    ],
+    interviewQA: [
+      {
+        question: 'Why does calling `Cache::get()` inside a Service Provider\'s `register()` method throw an error?',
+        answer:
+          'The bootstrap process runs in two passes. Pass 1: `register()` is called on all providers in order — during this pass, only the providers that have already run have their bindings available. `CacheServiceProvider` may not have run yet when your provider\'s `register()` runs, so `Cache::` (which resolves from the container) fails with "Target class [cache] does not exist". Pass 2: `boot()` runs after ALL `register()` calls have completed — at this point every service is in the container and `Cache::`, `DB::`, `Auth::`, `Event::` are all available. Rule: `register()` is for binding; `boot()` is for using.',
+        follow_up: 'What is a deferred Service Provider and how does it improve application startup time?',
+      },
+      {
+        question: 'How does a Laravel package get its Service Provider automatically registered without the app developer adding it to config/app.php?',
+        answer:
+          'Laravel\'s package auto-discovery reads the `extra.laravel.providers` and `extra.laravel.aliases` keys from the package\'s `composer.json`. After `composer install/update`, Laravel\'s `PackageManifest` scans all installed packages, collects these providers, and caches them in `bootstrap/cache/packages.php`. On every request, Laravel loads this cached manifest and registers those providers alongside the app\'s own providers. Package authors must add `"extra": {"laravel": {"providers": ["Vendor\\Package\\PackageServiceProvider"]}}` to their `composer.json`. Apps can opt out with `"dont-discover": ["vendor/package"]` in their own `composer.json`.',
+        follow_up: 'How do you disable auto-discovery for a specific package that has a conflicting service provider?',
+      },
+    ],
+  },
+
+  'Repository Pattern in Laravel': {
+    explanation:
+      'The Repository Pattern adds an abstraction layer between your business logic and Eloquent. Instead of calling `User::where("active", true)->latest()->paginate(15)` directly in controllers, you call `$this->userRepo->getActivePaginated(15)`. The repository class owns all queries for a model. Benefits: (1) Controllers stay thin — they orchestrate, repositories query. (2) Query logic is in one place — `getActivePaginated()` is reused across controllers, commands, and jobs. (3) Testing: swap `EloquentUserRepository` for `InMemoryUserRepository` without touching controllers. In Laravel, use interface binding in the container to swap implementations.',
+    realWorldExample:
+      'A SaaS with complex billing logic: `BillingController` calls `$this->subscriptionRepo->getExpiringSoon(days: 7)`, `$this->subscriptionRepo->getByPlan(planId: $id)`, `$this->subscriptionRepo->countActiveByUser($userId)`. All Eloquent queries for `Subscription` are in `EloquentSubscriptionRepository`. When you switch from MySQL to a read-replica for reporting queries, you extend the repository and override the reporting methods — controller code is untouched.',
+    practicalUseCase:
+      'Create `UserRepositoryInterface` with `findActive(): Collection`, `findById(int $id): ?User`, `create(array $data): User`. Implement `EloquentUserRepository`. Bind in `AppServiceProvider`. Write a feature test and a unit test — the unit test binds `InMemoryUserRepository` and asserts query-free behavior.',
+    keyPoints: [
+      'Interface + binding: `app()->bind(UserRepoInterface::class, EloquentUserRepo::class)`. In tests: `app()->bind(UserRepoInterface::class, InMemoryUserRepo::class)`.',
+      'Keep repositories focused on queries — no business logic (validation, calculations) in repositories. Business logic belongs in Service classes.',
+      'Common repository methods: `findAll(array $filters)`, `findById(int $id)`, `findBy(string $col, $value)`, `create(array $data)`, `update(int $id, array $data)`, `delete(int $id)`.',
+      'Repositories should not return Eloquent models in the method signature if you want true framework independence — use DTOs or value objects instead. For most Laravel apps returning Eloquent models is acceptable.',
+      'Fat repositories are an anti-pattern — if a repository has 30 methods, split it by concern (OrderSearchRepository, OrderWriteRepository).',
+      'Repository pattern adds indirection cost — only use it when: (1) you have complex reusable queries, (2) you need testability without DB, (3) there\'s a chance you\'ll switch data sources.',
+      'For simple Laravel apps, the Service class calling Eloquent directly (without a Repository) is a valid and simpler architecture.',
+    ],
+    interviewQA: [
+      {
+        question: 'What problem does the Repository Pattern solve and when is it NOT worth adding?',
+        answer:
+          'Repository Pattern solves three problems: (1) Query logic scattered across controllers, commands, and jobs — the same `User::where("active", true)` is copy-pasted in 8 places, all must be updated when the logic changes. (2) Controllers that directly call Eloquent are harder to unit test without a real database. (3) Tight coupling to Eloquent makes switching ORMs or databases painful. It is NOT worth adding for: simple CRUD apps with thin controllers, apps where queries are already centralized in scopes and services, teams unfamiliar with the pattern who will implement it inconsistently, or small projects where the abstraction overhead outweighs the benefit.',
+        follow_up: 'How is the Repository Pattern different from Eloquent\'s local scopes, and when would you choose one over the other?',
+      },
+      {
+        question: 'How do you handle transactions that span multiple repositories?',
+        answer:
+          'Transactions should not be in repositories — a repository method represents one data access operation, not a business transaction. Transactions belong in the Service layer (or a Unit of Work): wrap multiple repository calls in `DB::transaction(function() use ($orderRepo, $inventoryRepo) { $order = $orderRepo->create($data); $inventoryRepo->deduct($order->items); })`. If one operation fails, the entire transaction rolls back — neither repository needs to know about the transaction. For even cleaner separation, inject a `TransactionManager` interface that wraps `DB::transaction()` so the service can be tested without a real database transaction.',
+        follow_up: 'What is the Unit of Work pattern and how does it relate to the Repository Pattern?',
+      },
+    ],
+  },
+
+  'Queues and Jobs': {
+    explanation:
+      'Laravel queues serialize a job class (with its constructor arguments) to JSON and push it to a backend — Redis, SQS, database, or Beanstalkd. A queue worker (`php artisan queue:work`) polls the backend, deserializes the job, calls `handle()`, and ACKs success or marks failure. Jobs implement `ShouldQueue` — dispatching returns immediately to the caller while the job runs asynchronously. Key production features: `$tries` (retry count), `$backoff` (seconds between retries, supports arrays for exponential backoff), `$timeout` (kill worker if exceeded), `failed()` (called after all retries are exhausted), `ShouldBeUnique` (prevents duplicate jobs in the queue).',
+    realWorldExample:
+      'A subscription billing system: `ProcessRenewal` runs nightly via the Scheduler, dispatching one job per expiring subscription. Each job calls the Stripe API, marks the subscription renewed, and chains `SendReceiptEmail::dispatch()` (only fires if billing succeeds). Stripe webhook failures dispatch `HandleFailedPayment` to a "webhooks" high-priority queue — workers run `--queue=webhooks,default` so webhook jobs are processed before batch billing jobs. Laravel Horizon monitors all queues in real time and alerts when the queue depth exceeds 100 jobs.',
+    practicalUseCase:
+      'Create a `GenerateMonthlyReport` job with `$tries = 2`, `$timeout = 300`, and a `failed()` method that emails the admin. Dispatch it from a console command. Test with `Queue::fake()`: assert it was pushed to the "reports" queue with the correct user payload. Then run the worker with `php artisan queue:work --queue=reports` and verify the report file is created.',
+    keyPoints: [
+      'Job chaining: `SendInvoice::withChain([UpdateLedger::class, NotifyAccountant::class])->dispatch()` — runs sequentially, aborts on failure.',
+      'Job batching: `Bus::batch([...jobs])->then(fn() => ...)->catch(fn() => ...)->dispatch()` — parallel batch with completion callbacks.',
+      '`ShouldBeUnique` with `uniqueId()` returning a model ID prevents duplicate jobs for the same entity from piling up.',
+      '`$backoff = [30, 120, 300]` — first retry after 30s, second after 2min, third after 5min. Exponential backoff for flaky third-party APIs.',
+      '`$this->release(60)` inside `handle()` pushes the job back with a 60-second delay without counting as a failure — use for rate limiting.',
+      '`failed_jobs` table captures full payload + exception on exhausted retries. `php artisan queue:retry {id}` reprocesses specific failed jobs.',
+      'Queue connection vs queue name: connection = Redis/SQS/database driver; queue name = logical priority lane within that connection.',
+    ],
+    interviewQA: [
+      {
+        question: 'A payment job keeps failing after 3 retries and landing in failed_jobs. How do you diagnose and recover?',
+        answer:
+          'First: `php artisan queue:failed` — shows the exception, payload, and failed-at timestamp. Read the exception — is it a temporary Stripe 429 rate limit, a network timeout, or a permanent data error? If temporary: increase `$backoff` array, increase `$tries`, and use `$this->release()` with longer delays to give the external API more time. Re-run with `php artisan queue:retry {id}`. If the data is bad (missing required field): fix the underlying data, then retry. For permanent failures: the `failed()` method should alert the team and create an incident record. Implement `Throwable $exception` typing on `failed()` to access the full exception context for logging.',
+        follow_up: 'How does `ShouldBeUnique` work and what happens if the lock cannot be acquired?',
+      },
+      {
+        question: 'What is the difference between job chaining and job batching in Laravel?',
+        answer:
+          'Chaining (`withChain([...])`) runs jobs sequentially — Job B only starts after Job A completes successfully. If any job fails, the chain stops and subsequent jobs are not run. Useful for dependent steps: charge → send receipt → update ledger. Batching (`Bus::batch([...])`) runs jobs in parallel — all are dispatched immediately and processed concurrently by available workers. Batch callbacks (`then`, `catch`, `finally`) fire when the entire batch completes, partially fails, or finishes regardless. Useful for independent tasks: import 1000 users simultaneously, notify when all are imported. You can mix both: a batch of chains.',
+        follow_up: 'How do you monitor queue health and depth in production without polling the database?',
+      },
+    ],
+  },
+
+  'Events and Listeners': {
+    explanation:
+      'Laravel Events implement the Observer/Pub-Sub pattern for decoupling business logic. An Event is a plain PHP class carrying data (`OrderPlaced($order)`). Listeners respond to events — they can be synchronous (run in the same request) or queued (pushed to the queue as a background job). Registering a listener in `EventServiceProvider::$listen` means the controller dispatching `OrderPlaced::dispatch($order)` has zero knowledge of what happens next. Adding a 5th behavior (e.g., triggering a CRM webhook) is one new Listener class — the controller never changes. Model Observers are a simplified event system for Eloquent lifecycle hooks.',
+    realWorldExample:
+      'An e-commerce checkout: `OrderController::store()` calls `OrderPlaced::dispatch($order)`. Four listeners fire: `DeductInventory` (synchronous — must succeed before response), `SendOrderConfirmation` (queued to "emails" queue), `NotifyWarehouseSystem` (queued — calls a third-party WMS API), `TriggerRewardPoints` (queued — awards loyalty points). The marketing team adds `TrackOrderInCRM` as a 5th listener. The checkout controller is not modified. Each listener is independently testable and independently deployable.',
+    practicalUseCase:
+      'Create `UserRegistered` event. Write `SendWelcomeEmail` (queued listener) and `CreateDefaultWorkspace` (synchronous listener). Register both in `EventServiceProvider`. Use `Event::fake()` in a test: assert the event was dispatched, assert both listeners are registered. Then remove `Event::fake()` — run the full integration test and assert the workspace was created in the DB and the mail was queued.',
+    keyPoints: [
+      'Synchronous listeners run in the same request — their exceptions bubble up and can fail the request. Queued listeners run in the background.',
+      'Listeners implement `ShouldQueue` for background execution. Add `$queue = "emails"` property to route to a specific queue.',
+      '`Event::dispatch(new OrderPlaced($order))` or the static shorthand `OrderPlaced::dispatch($order)` — both are equivalent.',
+      'Model Observers: `php artisan make:observer ProductObserver --model=Product`. Register with `Product::observe(ProductObserver::class)` in a Service Provider `boot()`.',
+      '`Event::fake()` prevents listeners from running. `Event::assertDispatched(OrderPlaced::class, fn($e) => $e->order->id === $orderId)` verifies.',
+      'Auto-discovery: `Event::discover()` in `EventServiceProvider` scans all Listener classes for `#[AsListener]` attributes — removes need for manual `$listen` array.',
+      'Stoppable events: return `false` from a listener to prevent subsequent listeners from running — useful for permission-gate listeners.',
+    ],
+    interviewQA: [
+      {
+        question: 'What is the difference between Events + Listeners and just calling the service directly from the controller?',
+        answer:
+          'Direct calls: `$controller->store()` calls `$emailService->sendConfirmation($order)`, `$inventoryService->deduct($order)`, `$warehouseApi->notify($order)` sequentially. Problems: the controller is coupled to every downstream service, must be modified when a new downstream action is added, and all failures surface immediately to the HTTP response. Events + Listeners: `OrderPlaced::dispatch($order)` is one line. Each listener handles its concern independently. Queued listeners don\'t block the response. New behaviors are new Listener classes — zero controller changes. Trade-off: event-driven code is harder to trace ("what handles this event?"), so use `Event::getListeners(OrderPlaced::class)` or IDE plugin to navigate.',
+        follow_up: 'How do you handle a failing queued listener that must not block the order from completing?',
+      },
+      {
+        question: 'When would you use a Model Observer instead of a regular Event + Listener?',
+        answer:
+          'Use Model Observers when: (1) You need to hook into multiple Eloquent lifecycle events for one model (creating, created, updating, updated, deleted, restored) — an Observer consolidates them in one class instead of multiple Event+Listener pairs. (2) The behavior is tightly coupled to the model lifecycle — e.g., always generating a slug on `creating`, always invalidating cache on `updated`. Use Events+Listeners when: (1) The reaction spans multiple models or is a domain event (OrderPlaced triggers actions in Inventory, Email, CRM). (2) You need queued background processing. (3) Multiple unrelated behaviors respond to the same trigger. Observers are scoped to one model; Events are for cross-domain decoupling.',
+        follow_up: 'How do you temporarily disable a Model Observer during a mass import to avoid triggering hooks for 50,000 rows?',
+      },
+    ],
+  },
+
+  'Task Scheduling': {
+    explanation:
+      'Laravel\'s task scheduler replaces a proliferation of cron jobs with a single cron entry: `* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1`. The scheduler runs every minute; `schedule:run` checks `app/Console/Kernel.php` to see which tasks are due and runs them. Tasks are defined in `Kernel::schedule()` using a fluent API: `$schedule->command("reports:generate")->dailyAt("02:00")->withoutOverlapping()`. `withoutOverlapping()` acquires a cache lock so if a previous run is still executing, the new one is skipped — critical for long-running jobs that might run every minute.',
+    realWorldExample:
+      'A SaaS platform\'s Kernel::schedule(): `->command("subscriptions:renew")->daily()->at("01:00")->withoutOverlapping()->runInBackground()` runs renewal overnight. `->job(new PruneOldNotifications)->weekly()` dispatches a job to the queue. `->call(fn() => Cache::flush())->hourly()` clears cache. `->command("telescope:prune --hours=24")->daily()` prunes debug data. All these crons are in code, version-controlled, and testable — no cron tab management on servers.',
+    practicalUseCase:
+      'Register two scheduled tasks: one that generates a CSV report every day at 3 AM (email it on success/failure), and one that pings a health-check URL every 5 minutes using `->everyFiveMinutes()->thenPingOnSuccess($url)`. Test them with `php artisan schedule:list` and run a specific task with `php artisan schedule:run --task="reports:generate"`.',
+    keyPoints: [
+      '`->withoutOverlapping()` uses a cache lock (default 24h) — if the previous run is still executing, the new one is skipped entirely.',
+      '`->runInBackground()` runs the command in a separate process — the scheduler does not wait for it to finish before scheduling the next task.',
+      '`->onOneServer()` distributes tasks across multiple servers — only one server actually runs the task per scheduled interval (uses atomic cache locks).',
+      '`->emailOutputTo("admin@example.com")` captures command output and emails it — useful for auditing nightly reports.',
+      '`->before(fn() => ...)` and `->after(fn() => ...)` hooks run code before/after the scheduled task without modifying the command class.',
+      '`->environments(["production"])` limits a task to specific environments — prevents nightly billing jobs from running in staging.',
+      'Testing: `$schedule->command("foo")->daily()` — use `Artisan::call("schedule:run")` with Carbon::setTestNow() to simulate a specific time.',
+    ],
+    interviewQA: [
+      {
+        question: 'What happens if a scheduled command runs for 90 seconds but is scheduled every minute?',
+        answer:
+          'Without `withoutOverlapping()`: at minute 1 the task starts; at minute 2 the scheduler fires again and starts a SECOND instance of the task while the first is still running. By minute 10, there are 9 overlapping instances all writing to the same report file or hitting the same database rows — data corruption and resource exhaustion. With `->withoutOverlapping()`: when the scheduler fires at minute 2, it tries to acquire a cache lock. The lock is held by minute 1\'s run, so the new execution is skipped. Only one instance runs at a time. Set the lock time appropriately: `->withoutOverlapping(30)` holds the lock for 30 minutes maximum before releasing (prevents a zombie lock if the task crashes).',
+        follow_up: 'How does `->onOneServer()` work in a multi-server deployment and what does it use for coordination?',
+      },
+      {
+        question: 'How do you test that a scheduled command runs at the correct time and interval?',
+        answer:
+          'Use `php artisan schedule:list` to verify the next due time for each task. For unit testing, bind a spy on the scheduled command: `$this->artisan("schedule:run")` with `Carbon::setTestNow("2024-01-15 03:00:00")` to simulate 3 AM — tasks scheduled `dailyAt("03:00")` will fire. Assert with `$this->artisan("report:generate")->assertExitCode(0)`. For integration: use the `Schedule` facade — `Schedule::command("report:generate")->daily()->at("03:00")` — inspect `$schedule->events()` in a test to assert the correct frequency and time. Do not rely on system cron for testing — always drive tests through `schedule:run` with a mocked clock.',
+        follow_up: 'How do you monitor scheduled tasks in production to detect when they fail silently?',
+      },
+    ],
+  },
+
+  'Testing with PHPUnit and Pest': {
+    explanation:
+      'Laravel\'s testing layer wraps PHPUnit (or Pest as a syntax layer) with HTTP simulation (`$this->getJson()`, `$this->postJson()`), database assertions (`assertDatabaseHas()`, `assertDatabaseMissing()`), and fakes for Mail, Queue, Event, Notification, and HTTP client. Feature tests test the full request lifecycle — middleware, controller, service, database — against a real database wrapped in a transaction. Unit tests test a single class in isolation. `RefreshDatabase` resets the DB between tests using transactions (fast). Pest adds expressive syntax: `it("creates an order")->assertCreated()` instead of PHPUnit\'s method-based approach.',
+    realWorldExample:
+      'A checkout feature test: `Queue::fake()`, `Mail::fake()`, `Http::fake(["api.stripe.com/*" => Http::response(["id" => "ch_123"])])`. POST to `/api/checkout` with valid data. Assert: 201 status, `orders` row in DB, `ProcessPayment` job dispatched with correct order ID, `OrderConfirmation` mail queued to user\'s email. All in one test — no real Stripe call, no real email, no background worker needed. This is a complete integration test of the checkout flow.',
+    practicalUseCase:
+      'Write three tests for a delete-post endpoint: (1) authenticated owner deletes successfully (200, DB row gone). (2) Authenticated non-owner gets 403 (DB row intact). (3) Unauthenticated request gets 401. Use `RefreshDatabase`, `User::factory()`, `Post::factory()->for($user)`, and `actingAs($user, "sanctum")`.',
+    keyPoints: [
+      '`RefreshDatabase` wraps each test in a DB transaction rolled back after — fast. `DatabaseMigrations` re-runs `migrate:fresh` per test — very slow, avoid.',
+      '`Queue::fake()` stops jobs from executing. `Queue::assertPushed(SendEmail::class, fn($job) => $job->user->id === $id)` asserts payload.',
+      '`Http::fake(["stripe.com/*" => Http::sequence()->push(["id" => "ch_1"])->push(Http::response("", 500))])` simulates success then failure.',
+      'Pest syntax: `it("rejects unauthenticated requests", fn() => $this->getJson("/api/orders")->assertUnauthorized())` — same PHPUnit under the hood.',
+      '`actingAs($user, "sanctum")` authenticates via Sanctum guard for API feature tests. `actingAs($user)` uses the default web guard.',
+      '`$this->assertDatabaseHas("orders", ["user_id" => $user->id, "status" => "pending"])` — partial match, not full row match.',
+      'Mock vs Fake: `Mail::fake()` is a test double that records calls. `$this->mock(PaymentGateway::class)` creates a Mockery mock with expectations.',
+    ],
+    interviewQA: [
+      {
+        question: 'What is the difference between `RefreshDatabase` and `DatabaseTransactions` traits in Laravel tests?',
+        answer:
+          '`RefreshDatabase` runs `migrate:fresh` once for the entire test suite (on first test) and then wraps each test in a database transaction that rolls back after. This gives a clean state per test without re-running migrations repeatedly. `DatabaseTransactions` only wraps each test in a transaction without running migrations — assumes the database schema already exists. The problem: if any test uses `DB::unprepared()`, raw queries outside the transaction, or database connections that don\'t support transactions (like SQLite in WAL mode), the transaction rollback may not work correctly. `RefreshDatabase` is the safe default.',
+        follow_up: 'How do you test a feature that spawns a separate database connection (e.g., a queued job) and verify its database changes?',
+      },
+      {
+        question: 'How do you write a test that asserts EXACTLY 2 database queries were run during a request?',
+        answer:
+          'Use `DB::enableQueryLog()` before the action and `DB::getQueryLog()` after: `DB::enableQueryLog(); $this->getJson("/api/posts"); $queries = DB::getQueryLog(); $this->assertCount(2, $queries);`. This verifies N+1 is prevented. For a more granular assertion, loop through `$queries` and assert specific SQL patterns. A cleaner approach: create a custom assertion method in a base test class. Note: `RefreshDatabase`\'s transaction wrapping adds setup queries — call `DB::flushQueryLog()` after the test setup but before the action to get only action-related queries.',
+        follow_up: 'When would you use a Mockery mock versus Laravel\'s built-in Mail::fake() for testing email sending?',
+      },
+    ],
+  },
+
+  'Caching, Performance, and Optimization': {
+    explanation:
+      'Laravel\'s cache is a unified API over Redis, Memcached, file, database, and DynamoDB. `Cache::remember("key", $ttl, fn)` returns cached data or runs the closure, stores it, and returns it. Cache tags (`Cache::tags(["products"])->flush()`) invalidate groups of related cached keys atomically — requires Redis or Memcached (file/database do not support tags). Beyond application-level caching, Laravel config/route/view caching reduces bootstrap overhead significantly in production. Query optimization — eager loading, indexes, `select()`, `chunkById()` — is usually higher-impact than adding a cache layer.',
+    realWorldExample:
+      'A product catalog with 10 filter combinations: cache each combination under a key `"products_" . md5(serialize($request->query()))` tagged with `["products"]`. When any product is updated, `Cache::tags(["products"])->flush()` invalidates all 10 cached variants in one call. Without tags, you\'d need to track and delete each key manually. The cache layer reduces a 400ms database query (with JOINs and filters) to a 2ms Redis read for repeat visitors — meaningful for a high-traffic catalog page.',
+    practicalUseCase:
+      'Profile a slow endpoint with `DB::listen()`. Identify the slowest query. Add a composite index via migration. Measure the improvement. Then add `Cache::tags(["products"])->remember(...)` to cache the result. Add `Cache::tags(["products"])->flush()` in the Product observer\'s `saved()` method. Compare response times before/after with `php artisan telescope:clear` and Telescope\'s request log.',
+    keyPoints: [
+      '`Cache::remember("key", 3600, fn() => heavyQuery())` — returns cached value if exists, otherwise runs closure, caches for 1 hour.',
+      'Cache tags require Redis/Memcached. File and database cache drivers do NOT support tags — `Cache::tags()` throws a `BadMethodCallException`.',
+      '`php artisan config:cache` merges all config files into one cached file — eliminates config file reading on every request (mandatory in production).',
+      '`php artisan route:cache` compiles all routes to a single cached file — eliminates route file parsing. Must re-run after any route change.',
+      '`php artisan optimize` runs config, route, and view cache in one command — run this during deployment.',
+      'Thundering herd: `Cache::lock("key", 30)->block(5, fn() => ...)` prevents multiple workers regenerating the same cache simultaneously.',
+      'HTTP response caching (`spatie/laravel-responsecache`) caches full rendered responses — most aggressive, invalidate carefully.',
+    ],
+    interviewQA: [
+      {
+        question: 'How do cache tags work in Redis and why can\'t you use them with the file cache driver?',
+        answer:
+          'When you call `Cache::tags(["products"])->put("product_list_page1", $data, 3600)`, Laravel stores: (1) The cached value at a namespaced key like `{tag_hash}:product_list_page1`. (2) A reference to that key in a Redis Set named after the tag. `Cache::tags(["products"])->flush()` reads the tag\'s Redis Set, iterates all stored keys, and DELETEs them all — one atomic operation. The file driver has no equivalent of a Redis Set for tracking which files belong to a tag. Implementing it would require a separate index file that must be locked for reads and writes — not worth the complexity. The database driver has the same limitation: no built-in atomic multi-key grouping mechanism.',
+        follow_up: 'What is the thundering herd problem with Cache::remember() and how does Cache::lock() solve it?',
+      },
+      {
+        question: 'What caching commands should you run during every Laravel production deployment?',
+        answer:
+          '`php artisan config:cache` — merges all `config/*.php` into `bootstrap/cache/config.php`. Without this, every request reads every config file. `php artisan route:cache` — compiles all routes to `bootstrap/cache/routes-v7.php`. Without this, every request parses web.php and api.php. `php artisan view:cache` — pre-compiles all Blade templates. Without this, Blade checks file modification timestamps and recompiles when needed. `php artisan event:cache` — caches the event-listener map from auto-discovery. Run `php artisan optimize` to execute all four in sequence. Critical: run `php artisan optimize:clear` or `php artisan cache:clear` if you change config/routes/views — stale caches serve wrong data.',
+        follow_up: 'What breaks when you run `php artisan config:cache` but have `env()` calls outside of config files?',
+      },
+    ],
+  },
+
+  'Laravel Interview Architectures': {
+    explanation:
+      'Senior Laravel interviews focus on architectural decisions: when to use events vs direct service calls, when the Repository Pattern adds value vs complexity, how to design a queue system for reliability, how to handle multi-tenancy, and how to scale a Laravel app beyond a single server. These are trade-off questions — there is rarely one right answer. The ability to articulate WHY you chose an approach, what you gave up, and when you\'d choose differently is what separates senior engineers from developers who know the framework syntax.',
+    realWorldExample:
+      'Real architectural questions from senior Laravel interviews: "Design the queue system for a financial transaction processor that cannot lose a single job." (Answer: SQS FIFO queue, `$tries = 1` with no auto-retry, manual retry with idempotency keys, `failed()` method creates an incident, dead-letter queue monitored by PagerDuty.) "How do you handle 10,000 concurrent users hitting the same product page?" (Answer: Redis response cache with 60s TTL, CDN in front, read replicas for DB, horizontal scaling with Redis session driver.)',
+    practicalUseCase:
+      'Design a multi-tenant SaaS where each tenant has isolated data. Compare: (A) Separate database per tenant — complete isolation, high overhead. (B) Shared database, tenant_id column on every table with global query scope — simple but risk of scope forgetting. (C) Separate schema per tenant (PostgreSQL) — middle ground. Justify your choice for a 500-tenant SaaS with mixed enterprise and self-serve customers.',
+    keyPoints: [
+      'Fat controller anti-pattern: business logic in controllers makes it untestable and unreusable. Thin controllers call services; services call repositories.',
+      'Service layer: `OrderService::placeOrder(array $data): Order` orchestrates validation, inventory check, payment charge, event dispatch — all in one transactional service method.',
+      'Multi-tenancy approaches: `tenant_id` global scope (simplest), separate databases (most isolated, hardest to manage), subdomain-based routing to per-tenant config.',
+      'Horizontal scaling: stateless Laravel (no local file sessions, no local file cache) → Redis for sessions + cache, S3 for file storage, MySQL read replica for read traffic.',
+      'CQRS in Laravel: separate read models (optimized SQL views or cache) from write models (Eloquent with validation) — justified when read patterns differ dramatically from write patterns.',
+      'Queue reliability: Redis queues with Horizon for visibility; SQS for guaranteed delivery at scale; never use the database driver for high-throughput queues.',
+      'Event sourcing: store every state change as an immutable event log — powerful for audit trails and time-travel debugging, complex to implement correctly.',
+    ],
+    interviewQA: [
+      {
+        question: 'How would you design a Laravel system to process 1 million webhook events per day reliably?',
+        answer:
+          'Receive webhooks in a thin controller that validates the signature (`hash_equals()` with the provider\'s secret) and immediately returns 200 — never do processing inline. Dispatch a `ProcessWebhook` job to an SQS queue. SQS is preferred over Redis for this scale: guaranteed delivery, dead-letter queues, no data loss if a worker crashes. Use `ShouldBeUnique` with the webhook event ID as `uniqueId()` to handle provider retries (idempotency). Set `$tries = 1` — prefer moving to dead-letter queue over retrying indefinitely. Run multiple Horizon workers (`superqueue` in Supervisor) to consume in parallel. Monitor dead-letter queue depth with CloudWatch alarms. Daily: roughly 11 webhooks/second peak — 5 workers handle this comfortably.',
+        follow_up: 'How do you guarantee exactly-once processing for a webhook that triggers a financial transaction?',
+      },
+      {
+        question: 'What is the difference between a Service class and a Job in Laravel, and when would you use each?',
+        answer:
+          'A Service class is a synchronous PHP class with no queue concerns — it encapsulates business logic for use within the HTTP request: `OrderService::placeOrder()` validates, charges, and creates the order in the same request. A Job is a queueable unit of work that runs asynchronously in a worker process — it should be serializable (all constructor arguments must be serializable, typically Eloquent models). Use a Service when: the result is needed in the current request (you must return the order ID to the user), or the work is fast (<100ms). Use a Job when: the work is slow (email sending, PDF generation, API calls), failures should retry without affecting the user, or the work is triggered by events that fire during the request. The two are not mutually exclusive: your Service can dispatch Jobs internally.',
+        follow_up: 'How do you avoid the "god class" anti-pattern when a Service class grows to 500 lines?',
+      },
+      {
+        question: 'How would you implement multi-tenancy in a Laravel SaaS with 200 tenants?',
+        answer:
+          'For 200 tenants, a shared database with `tenant_id` global scope is the practical choice. Implementation: (1) Add `tenant_id` to every tenant-scoped table. (2) Create a `BelongsToTenant` trait with a `GlobalScope` that adds `WHERE tenant_id = {current_tenant_id}` to every query. (3) Resolve the current tenant in middleware from the subdomain or JWT claim and store it in a `TenantManager` singleton. (4) Override `creating` in the trait to auto-set `tenant_id`. Risk: forgetting to apply the trait to a new model exposes cross-tenant data — mitigate with a test that seeds two tenants and asserts models are isolated. Separate databases per tenant become worth it at 1000+ tenants or when compliance requires data residency guarantees. `spatie/laravel-multitenancy` is the standard package.',
+        follow_up: 'How do you run database migrations across all 200 tenant databases if you choose the separate-database approach?',
+      },
+    ],
+  },
 };
 
 const devops: Record<string, SpecificSectionData> = {
@@ -618,6 +1147,7 @@ const automationQA: Record<string, SpecificSectionData> = {
 
 // Aggregated export: all topics keyed by topicId
 export const SPECIFIC_CONTENT: Record<string, Record<string, SpecificSectionData>> = {
+  ...JS_OOP_SOLID_CONTENT,
   react,
   nodejs,
   mysql,
